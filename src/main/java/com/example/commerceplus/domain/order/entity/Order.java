@@ -1,0 +1,73 @@
+package com.example.commerceplus.domain.order.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+
+@Entity
+@Table(name = "orders")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Order {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @Column(name = "total_price", nullable = false, columnDefinition = "int UNSIGNED")
+    private int totalPrice;
+
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+
+
+
+    public Order(Member member, int totalPrice, List<OrderItem> orderItems) {
+        this.member = member;
+        this.totalPrice = totalPrice;
+        orderItems.forEach(this::addOrderItem);
+    }
+
+    public Long getMemberId() {
+        return member.getId();
+    }
+
+
+
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+
+    /*public void cancelOrder() {
+        changeStatus(OrderStatus.CANCELLED);
+    }
+
+    public void completeOrder() {
+        changeStatus(OrderStatus.COMPLETED);
+    }*/
+
+
+    public String getOrderName() {
+        if (orderItems.isEmpty()) return "주문";
+        String firstName = orderItems.get(0).getProductName();
+        if (orderItems.size() == 1) return firstName;
+        return firstName + " 외 " + (orderItems.size() - 1) + "건";
+    }
+}
