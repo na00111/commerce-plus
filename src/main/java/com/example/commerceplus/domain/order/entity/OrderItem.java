@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "oder_items")
+@Table(name = "order_items")
 @Getter
 @NoArgsConstructor
-public class OderItem {
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,18 +25,18 @@ public class OderItem {
     @Column(name = "product_name", nullable = false,length = 200)
     private String productName;
 
-    @Column(name = "order_price", nullable = false, columnDefinition = "int UNSIGNED")
-    private int orderPrice;
+    @Column(name = "price_snapshot", nullable = false, columnDefinition = "int UNSIGNED")
+    private int priceSnapshot;
 
     @Column(nullable = false, columnDefinition = "int UNSIGNED")
     private int quantity;
 
 
 
-    /*public OrderItem(Product product, int orderPrice, int quantity) {
+    /*public OrderItem(Product product, int priceSnapshot, int quantity) {
         this.product = product;
         this.productName = product.getName();
-        this.orderPrice = orderPrice;
+        this.priceSnapshot = priceSnapshot;
         this.quantity = quantity;
     }
 
@@ -47,6 +47,6 @@ public class OderItem {
 
 
     public int getSubtotal() {
-        return orderPrice * quantity;
+        return priceSnapshot * quantity;
     }
 }

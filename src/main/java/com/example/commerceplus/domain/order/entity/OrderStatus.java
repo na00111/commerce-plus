@@ -4,7 +4,7 @@ public enum OrderStatus {
     PAYMENT_PENDING {
         @Override
         public boolean canTransitTo(OrderStatus target) {
-            return target == COMPLETED || target == CANCELLED;
+            return target == COMPLETED || target == CANCELED;
         }
     },
     COMPLETED {
@@ -13,7 +13,7 @@ public enum OrderStatus {
             return target == CANCELED;
         }
     },
-    CANCELLED {
+    CANCELED {
         public boolean canTransitTo(OrderStatus target) {
             return false;
         }
