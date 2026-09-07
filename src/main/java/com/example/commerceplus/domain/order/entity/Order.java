@@ -1,5 +1,6 @@
 package com.example.commerceplus.domain.order.entity;
 
+import com.example.commerceplus.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
