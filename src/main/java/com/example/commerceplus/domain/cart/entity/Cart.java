@@ -1,5 +1,6 @@
 package com.example.commerceplus.domain.cart.entity;
 
+import com.example.commerceplus.common.entity.BaseTimeEntity;
 import com.example.commerceplus.domain.member.entity.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

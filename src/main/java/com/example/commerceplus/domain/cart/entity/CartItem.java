@@ -1,6 +1,10 @@
 package com.example.commerceplus.domain.cart.entity;
 
 
+import com.example.commerceplus.common.entity.BaseTimeEntity;
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
+import com.example.commerceplus.domain.product.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +28,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 
 public class CartItem extends BaseTimeEntity {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,7 @@
 package com.example.commerceplus.domain.order.entity;
 
 import com.example.commerceplus.common.entity.BaseTimeEntity;
+import com.example.commerceplus.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,8 +35,7 @@ public class OrderItem extends BaseTimeEntity {
     private int quantity;
 
 
-
-    /*public OrderItem(Product product, int priceSnapshot, int quantity) {
+    public OrderItem(Product product, int priceSnapshot, int quantity) {
         this.product = product;
         this.productName = product.getName();
         this.priceSnapshot = priceSnapshot;
@@ -44,9 +44,7 @@ public class OrderItem extends BaseTimeEntity {
 
     void setOrder(Order order) {
         this.order = order;
-    }*/
-
-
+    }
 
     public int getSubtotal() {
         return priceSnapshot * quantity;
