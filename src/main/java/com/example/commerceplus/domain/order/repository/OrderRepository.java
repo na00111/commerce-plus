@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Order, Long>, OrderCustomRepository {
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 내 주문 목록 조회 (최신순)
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.member.id = :memberId ORDER BY o.createdAt DESC")
