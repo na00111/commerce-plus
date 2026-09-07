@@ -1,0 +1,117 @@
+package com.example.commerceplus.domain.payment.entity;
+
+import com.example.commerceplus.common.entity.BaseTimeEntity;
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
+import com.example.commerceplus.domain.member.entity.Member;
+import com.example.commerceplus.domain.order.entity.Order;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "payments")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Payment extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // 주문 1건당 결제 1건
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
+    private Order order;
+
+    // 결제 소유 회원
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    // 결제 금액 = 주문 총액
+    @Column(nullable = false, columnDefinition = "INT UNSIGNED")
+    private int amount;
+
+    // 결제 상태
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PaymentStatus status;
+
+    // 결제 완료 시각
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    private Payment(Order order) {
+        this.order = order;
+        this.member = order.getMember();
+
+        // 클라이언트가 금액을 정하는 것이 아니라
+        // 서버에 저장된 주문 총액을 결제 금액으로 사용
+        this.amount = order.getTotalPrice();
+
+        this.status = PaymentStatus.PAYMENT_PENDING;
+    }
+
+    // 주문 생성 시 결제 사전 기록 생성
+    public static Payment create(Order order) {
+        return new Payment(order);
+    }
+
+    // 요청 금액 검증
+    public void validateAmount(int requestAmount) {
+        if (this.amount != requestAmount) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+    }
+
+    // PAYMENT_PENDING → COMPLETED
+    public void complete(LocalDateTime paidAt) {
+        if (this.status != PaymentStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.ALREADY_PROCESSED_PAYMENT);
+        }
+
+        this.status = PaymentStatus.COMPLETED;
+        this.paidAt = paidAt;
+    }
+
+    // PAYMENT_PENDING → FAILED
+    public void fail() {
+        if (this.status != PaymentStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.ALREADY_PROCESSED_PAYMENT);
+        }
+
+        this.status = PaymentStatus.FAILED;
+    }
+
+    // COMPLETED → CANCELED
+    public void cancel() {
+        if (this.status != PaymentStatus.COMPLETED) {
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT_STATUS);
+        }
+
+        this.status = PaymentStatus.CANCELED;
+    }
+
+    public Long getOrderId() {
+        return order.getId();
+    }
+
+    public Long getMemberId() {
+        return member.getId();
+    }
+}
