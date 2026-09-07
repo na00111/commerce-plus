@@ -1,5 +1,6 @@
 package com.example.commerceplus.domain.member.entity;
 
+import com.example.commerceplus.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,10 +19,10 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50 )
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50 )
     private String name;
 
     @Column(nullable = false)
@@ -32,12 +33,12 @@ public class Member extends BaseTimeEntity {
 
     // 기본값은 일반 사용자
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Role role = Role.NORMAL;
 
     // 기본값은 활성
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Status status = Status.ACTIVE;
 
     // 일반 사용자 가입
@@ -54,6 +55,12 @@ public class Member extends BaseTimeEntity {
     public Member(
             String email, String password, String name, String phoneNumber, Role role)
     {
+
+        if (role == Role.NORMAL) {
+            Member member = new Member(email, password, name, phoneNumber);
+            return;
+        }
+
         this.email = email;
         this.password = password;
         this.name = name;
@@ -74,6 +81,7 @@ public class Member extends BaseTimeEntity {
     // 포인트 차감
     public void usePoint(int amount) {
         if (this.point < amount) {
+            // 추후 포인트 사용자 point enum 관련 추가 및 수정
             throw new IllegalArgumentException("보유한 포인트가 부족합니다.");
         }
         this.point -= amount;
@@ -82,6 +90,7 @@ public class Member extends BaseTimeEntity {
     // 포인트 충전
     public void earnPoint(int amount) {
         if (amount < 0) {
+            // 추후 포인트 사용자 point enum 관련 추가 및 수정
             throw new IllegalArgumentException("적립/환불 금액은 음수일 수 없습니다.");
         }
         this.point += amount;
