@@ -28,11 +28,12 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/product/**").permitAll()
-                        .requestMatchers("/subscriptions/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/**").permitAll()
+//                        .requestMatchers("/auth/**").permitAll()
+//                        .requestMatchers("/product/**").permitAll()
+//                        .requestMatchers("/subscriptions/**").permitAll()
+//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
                 )
 
                 .exceptionHandling(exception ->
