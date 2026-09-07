@@ -1,6 +1,7 @@
 package com.example.commerceplus.domain.order.entity;
 
 import com.example.commerceplus.common.entity.BaseTimeEntity;
+import com.example.commerceplus.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,16 +27,12 @@ public class Order extends BaseTimeEntity {
     @Column(name = "total_price", nullable = false, columnDefinition = "int UNSIGNED")
     private int totalPrice;
 
-
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
-
-
 
 
     public Order(Member member, int totalPrice, List<OrderItem> orderItems) {
@@ -47,8 +44,6 @@ public class Order extends BaseTimeEntity {
     public Long getMemberId() {
         return member.getId();
     }
-
-
 
 
     public void addOrderItem(OrderItem orderItem) {
