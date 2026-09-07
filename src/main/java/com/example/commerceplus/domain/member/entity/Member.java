@@ -1,5 +1,6 @@
 package com.example.commerceplus.domain.member.entity;
 
+import com.example.commerceplus.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,49 +19,29 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50 )
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50 )
     private String name;
 
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private int point;
-
-    // 기본값은 일반 사용자
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role = Role.NORMAL;
+    @Column(nullable = false, length = 20)
+    private Role role;
 
-    // 기본값은 활성
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.ACTIVE;
+    @Column(nullable = false, length = 20)
+    private Status status;
 
-    // 일반 사용자 가입
-    public Member(String email, String password, String name, String phoneNumber)
-    {
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.point = 3000;
+    public static Member createNormalMember(String email, String password, String name, String phoneNumber) {
+        return new Member(email, password, name, phoneNumber, Role.NORMAL, Status.ACTIVE);
     }
 
-    // 관리자 사용자 가입
-    public Member(
-            String email, String password, String name, String phoneNumber, Role role)
-    {
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.role = role;
-        this.status = Status.PENDING;
-        this.point = 0;
+    public static Member createAdminMember(String email, String password, String name, String phoneNumber, Role role) {
+        return new Member(email, password, name, phoneNumber, role, Status.INACTIVE);
     }
 
     public void activeAdmin(){
@@ -71,20 +52,13 @@ public class Member extends BaseTimeEntity {
         this.status = Status.INACTIVE;
     }
 
-    // 포인트 차감
-    public void usePoint(int amount) {
-        if (this.point < amount) {
-            throw new IllegalArgumentException("보유한 포인트가 부족합니다.");
-        }
-        this.point -= amount;
-    }
 
-    // 포인트 충전
-    public void earnPoint(int amount) {
-        if (amount < 0) {
-            throw new IllegalArgumentException("적립/환불 금액은 음수일 수 없습니다.");
-        }
-        this.point += amount;
+    private Member(String email, String password, String name, String phoneNumber,  Role role, Status status) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.status = status;
     }
-
 }
