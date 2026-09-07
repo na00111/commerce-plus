@@ -28,25 +28,20 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private int point;
-
-    // 기본값은 일반 사용자
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Role role = Role.NORMAL;
+    private Role role;
 
-    // 기본값은 활성
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Status status = Status.ACTIVE;
+    private Status status;
 
     public static Member createNormalMember(String email, String password, String name, String phoneNumber) {
-        return new Member(email, password, name, phoneNumber, 3000, Role.NORMAL, Status.ACTIVE);
+        return new Member(email, password, name, phoneNumber, Role.NORMAL, Status.ACTIVE);
     }
 
     public static Member createAdminMember(String email, String password, String name, String phoneNumber, Role role) {
-        return new Member(email, password, name, phoneNumber, 0, role, Status.INACTIVE);
+        return new Member(email, password, name, phoneNumber, role, Status.INACTIVE);
     }
 
     public void activeAdmin(){
@@ -57,32 +52,12 @@ public class Member extends BaseTimeEntity {
         this.status = Status.INACTIVE;
     }
 
-    // 포인트 차감
 
-    public void usePoint(int amount) {
-        if (this.point < amount) {
-            // 추후 포인트 사용자 point enum 관련 추가 및 수정
-            throw new IllegalArgumentException("보유한 포인트가 부족합니다.");
-        }
-        this.point -= amount;
-    }
-    // 포인트 충전
-
-    public void earnPoint(int amount) {
-        if (amount < 0) {
-            // 추후 포인트 사용자 point enum 관련 추가 및 수정
-            throw new IllegalArgumentException("적립/환불 금액은 음수일 수 없습니다.");
-        }
-        this.point += amount;
-    }
-
-
-    private Member(String email, String password, String name, String phoneNumber, int point, Role role, Status status) {
+    private Member(String email, String password, String name, String phoneNumber,  Role role, Status status) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
-        this.point = point;
         this.role = role;
         this.status = status;
     }
