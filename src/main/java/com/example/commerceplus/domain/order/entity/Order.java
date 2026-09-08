@@ -17,7 +17,7 @@ import java.util.List;
 public class Order extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,32 +35,27 @@ public class Order extends BaseTimeEntity {
     private List<OrderItem> orderItems = new ArrayList<>();
 
 
+    // 주문 객체 초기화 하면서 주문과 상품 항목들 연결
     public Order(Member member, int totalPrice, List<OrderItem> orderItems) {
         this.member = member;
         this.totalPrice = totalPrice;
         orderItems.forEach(this::addOrderItem);
     }
 
+
+    // 주문한 회원의 ID만 빠르게 조회
     public Long getMemberId() {
         return member.getId();
     }
 
 
+    // 주문에 상품을 추가하면서 양방향 관계 맺기
     public void addOrderItem(OrderItem orderItem) {
         this.orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
 
-
-    /*public void cancelOrder() {
-        changeStatus(OrderStatus.CANCELLED);
-    }
-
-    public void completeOrder() {
-        changeStatus(OrderStatus.COMPLETED);
-    }*/
-
-
+    // 주문을 사람이 읽을 수 있는 이름으로 표현
     public String getOrderName() {
         if (orderItems.isEmpty()) return "주문";
         String firstName = orderItems.get(0).getProductName();

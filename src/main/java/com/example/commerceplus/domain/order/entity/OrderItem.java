@@ -35,6 +35,7 @@ public class OrderItem extends BaseTimeEntity {
     private int quantity;
 
 
+    // 주문 항목을 생성하면서 상품 정보를 스냅샷으로 저장
     public OrderItem(Product product, int priceSnapshot, int quantity) {
         this.product = product;
         this.productName = product.getName();
@@ -42,10 +43,14 @@ public class OrderItem extends BaseTimeEntity {
         this.quantity = quantity;
     }
 
+
+    // 주문과 양방향 관계 설정
     void setOrder(Order order) {
         this.order = order;
     }
 
+
+    // 이 주문 항목의 소계 금액 계산
     public int getSubtotal() {
         return priceSnapshot * quantity;
     }
