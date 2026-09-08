@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Status {
+public enum ProductStatus {
     FOR_SALE("판매중"),
     SUSPENDED("판매중지");
 
