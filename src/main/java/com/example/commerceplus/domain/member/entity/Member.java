@@ -30,30 +30,30 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Role role;
+    private MemberRole role;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Status status;
+    private MemberStatus status;
 
     public static Member createNormalMember(String email, String password, String name, String phoneNumber) {
-        return new Member(email, password, name, phoneNumber, Role.NORMAL, Status.ACTIVE);
+        return new Member(email, password, name, phoneNumber, MemberRole.NORMAL, MemberStatus.ACTIVE);
     }
 
-    public static Member createAdminMember(String email, String password, String name, String phoneNumber, Role role) {
-        return new Member(email, password, name, phoneNumber, role, Status.INACTIVE);
+    public static Member createAdminMember(String email, String password, String name, String phoneNumber, MemberRole role) {
+        return new Member(email, password, name, phoneNumber, role, MemberStatus.INACTIVE);
     }
 
     public void activeAdmin(){
-        this.status = Status.ACTIVE;
+        this.status = MemberStatus.ACTIVE;
     }
 
     public void inactiveAdmin(){
-        this.status = Status.INACTIVE;
+        this.status = MemberStatus.INACTIVE;
     }
 
 
-    private Member(String email, String password, String name, String phoneNumber,  Role role, Status status) {
+    private Member(String email, String password, String name, String phoneNumber, MemberRole role, MemberStatus status) {
         this.email = email;
         this.password = password;
         this.name = name;

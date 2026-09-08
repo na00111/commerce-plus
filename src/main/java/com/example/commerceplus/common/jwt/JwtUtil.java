@@ -2,8 +2,8 @@ package com.example.commerceplus.common.jwt;
 
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
-import com.example.commerceplus.domain.member.entity.Role;
-import com.example.commerceplus.domain.member.entity.Status;
+import com.example.commerceplus.domain.member.entity.MemberRole;
+import com.example.commerceplus.domain.member.entity.MemberStatus;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -39,7 +39,7 @@ public class JwtUtil {
     }
 
     public String createToken
-            (Long memberId, String email, Role role, Status status)
+            (Long memberId, String email, MemberRole role, MemberStatus status)
     {
         Date date = new Date();
 

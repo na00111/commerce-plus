@@ -32,13 +32,13 @@ public class Product extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Category category;
+    private ProductCategory category;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Status status;
+    private ProductStatus status;
 
-    public Product(String name, int price, int stock, String comment, Category category, Status status) {
+    public Product(String name, int price, int stock, String comment, ProductCategory category, ProductStatus status) {
         isPriceLessThanZero(price);
         isStockLessThanOne(stock);
 

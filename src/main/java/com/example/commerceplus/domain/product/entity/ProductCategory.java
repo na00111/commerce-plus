@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Category {
+public enum ProductCategory {
     FASHION("패션/의류"),
     BEAUTY("뷰티/화장품"),
     ELECTRONICS("디지털/가전"),
