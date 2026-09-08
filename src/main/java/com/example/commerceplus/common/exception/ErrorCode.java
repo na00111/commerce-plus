@@ -17,6 +17,7 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "MEMBER_002", "이미 존재하는 이메일입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_003", "이메일 또는 비밀번호가 올바르지 않습니다."),
     PASSWORD_CONFIRMATION_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBER_004", "비밀번호와 확인 비밀번호가 일치하지 않습니다."),
+    Invalid_Admin_Role_Exception(HttpStatus.BAD_REQUEST, "MEMBER_005", "어드민 회원가입에서는 NORMAL 역할을 사용할 수 없습니다." ),
 
     // Product
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_001", "상품을 찾을 수 없습니다."),
