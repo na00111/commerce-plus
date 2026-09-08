@@ -2,8 +2,8 @@ package com.example.commerceplus.common.jwt;
 
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
-import com.example.commerceplus.domain.member.entity.Role;
-import com.example.commerceplus.domain.member.entity.Status;
+import com.example.commerceplus.domain.member.entity.MemberRole;
+import com.example.commerceplus.domain.member.entity.MemberStatus;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.naming.AuthenticationException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -59,8 +58,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         Long id = jwtUtil.getUserId(token);
         String email = jwtUtil.extractUserEmail(token);
-        Role role = Role.valueOf(jwtUtil.extractRole(token));
-        Status status = Status.valueOf(jwtUtil.extractStatus(token));
+        MemberRole role = MemberRole.valueOf(jwtUtil.extractRole(token));
+        MemberStatus status = MemberStatus.valueOf(jwtUtil.extractStatus(token));
         JwtUser jwtUser = new JwtUser(id, email, role, status);
 
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(
