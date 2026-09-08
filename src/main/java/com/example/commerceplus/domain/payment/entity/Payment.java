@@ -43,7 +43,7 @@ public class Payment extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    // 결제 금액 = 주문 총액
+    // 결제 금액은 서버에 저장된 주문 총액을 사용
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private int amount;
 
@@ -56,32 +56,35 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    // 외부에서 임의로 Payment를 생성하지 못하도록 private 생성자 사용
     private Payment(Order order) {
         this.order = order;
+
+        // 결제 회원은 주문 회원과 동일하게 설정
         this.member = order.getMember();
 
-        // 클라이언트가 금액을 정하는 것이 아니라
-        // 서버에 저장된 주문 총액을 결제 금액으로 사용
+        // 클라이언트가 보내는 금액이 아니라 서버의 주문 총액을 사용
         this.amount = order.getTotalPrice();
 
+        // 최초 결제 상태는 항상 결제 대기
         this.status = PaymentStatus.PAYMENT_PENDING;
     }
 
-    // 주문 생성 시 결제 사전 기록 생성
+    // 주문 생성 시 결제 대기 데이터를 생성
     public static Payment create(Order order) {
         return new Payment(order);
     }
 
-    // 요청 금액 검증
+    // 요청 금액과 서버에 저장된 결제 금액이 일치하는지 검증
     public void validateAmount(int requestAmount) {
         if (this.amount != requestAmount) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
     }
 
-    // PAYMENT_PENDING → COMPLETED
+    // 결제 성공: PAYMENT_PENDING → COMPLETED
     public void complete(LocalDateTime paidAt) {
-        if (this.status != PaymentStatus.PAYMENT_PENDING) {
+        if (!this.status.canTransitTo(PaymentStatus.COMPLETED)) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED_PAYMENT);
         }
 
@@ -89,28 +92,30 @@ public class Payment extends BaseTimeEntity {
         this.paidAt = paidAt;
     }
 
-    // PAYMENT_PENDING → FAILED
+    // 결제 실패: PAYMENT_PENDING → FAILED
     public void fail() {
-        if (this.status != PaymentStatus.PAYMENT_PENDING) {
+        if (!this.status.canTransitTo(PaymentStatus.FAILED)) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED_PAYMENT);
         }
 
         this.status = PaymentStatus.FAILED;
     }
 
-    // COMPLETED → CANCELED
+    // 결제 완료 후 취소: COMPLETED → CANCELED
     public void cancel() {
-        if (this.status != PaymentStatus.COMPLETED) {
+        if (!this.status.canTransitTo(PaymentStatus.CANCELED)) {
             throw new BusinessException(ErrorCode.INVALID_PAYMENT_STATUS);
         }
 
         this.status = PaymentStatus.CANCELED;
     }
 
+    // 연관된 주문 ID 반환
     public Long getOrderId() {
         return order.getId();
     }
 
+    // 결제 소유 회원 ID 반환
     public Long getMemberId() {
         return member.getId();
     }
