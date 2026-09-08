@@ -1,7 +1,9 @@
 package com.example.commerceplus.domain.member.controller;
 
 import com.example.commerceplus.common.api.ApiResponse;
+import com.example.commerceplus.domain.member.dto.request.CreateAdminRequest;
 import com.example.commerceplus.domain.member.dto.request.CreateMemberRequest;
+import com.example.commerceplus.domain.member.dto.response.CreateAdminResponse;
 import com.example.commerceplus.domain.member.dto.response.CreateMemberResponse;
 import com.example.commerceplus.domain.member.sevice.MemberService;
 import jakarta.validation.Valid;
@@ -22,6 +24,11 @@ public class MemberController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<CreateMemberResponse>> CreateMember(@Valid @RequestBody CreateMemberRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(memberService.createMember(request)));
+    }
+
+    @PostMapping("/admins/signup")
+    public ResponseEntity<ApiResponse<CreateAdminResponse>> CreateAdmin(@Valid @RequestBody CreateAdminRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(memberService.createAdmin(request)));
     }
 
 }
