@@ -1,24 +1,20 @@
 package com.example.commerceplus.domain.order.dto.response;
 
 import com.example.commerceplus.domain.order.entity.Order;
-
-import java.time.LocalDateTime;
+import com.example.commerceplus.domain.payment.entity.Payment;
 
 public record CreateOrderResponse(
-        Long id,
+        Long orderId,
         String orderNumber,
-        Integer totalPrice,
-        String status,
-        LocalDateTime createdAt
+        String paymentId,
+        int totalPrice
 ) {
-    // 정적 팩토리 메서드는 Record 내부에 위치해야 함
-    public static CreateOrderResponse from(Order order) {
+    public static CreateOrderResponse from(Order order, Payment payment) {
         return new CreateOrderResponse(
                 order.getId(),
                 order.getOrderNumber(),
-                order.getTotalPrice(),
-                order.getStatus().toString(),
-                order.getCreatedAt()
+                // payment.getPortonePaymentId(),
+                order.getTotalPrice()
         );
     }
 }

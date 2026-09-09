@@ -1,12 +1,12 @@
 package com.example.commerceplus.domain.order.dto.request;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record CreateOrderRequest(
-        @NotEmpty(message = "주문 상품은 최소 1개 이상이어야 합니다")
-        @Valid
-        List<OrderItemRequest> items
-) {}
+public record CreateOrderRequest(List<@NotNull Long> cartItemIds) {
+
+        public CreateOrderRequest {
+                cartItemIds = cartItemIds == null ? List.of() : List.copyOf(cartItemIds);
+        }
+}
