@@ -15,11 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
 
+    @Transactional(readOnly = true)
     public Page<Product> findProductAll(Pageable pageable, SearchProductCondition condition) {
 
         if (condition.isMinPriceGreaterThanMaxPrice()) {
@@ -29,6 +30,7 @@ public class ProductService {
        return productRepository.findProductsByCondition(pageable, condition);
     }
 
+    @Transactional(readOnly = true)
     public GetProductResponse findProduct(Long productId) {
 
         boolean isExistsProduct = productRepository.existsById(productId);
@@ -48,12 +50,14 @@ public class ProductService {
         return GetProductResponse.from(product);
     }
 
+    @Transactional // 동시성 제연을 위해 락이 없는 버전
     public Product findProductById(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
+    @Transactional // 동시성을 막기 위한 비관적 락을 사용한 버전
     public Product findProductByIdWithLock(Long productId) {
-        return productRepository.findById(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        return productRepository.findByIdWithLock(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
 }
