@@ -54,6 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (!jwtUtil.validateToken(token)) {
             request.setAttribute("exception", ErrorCode.INVALID_TOKEN);
             filterChain.doFilter(request, response);
+            return;
         }
 
         Long id = jwtUtil.getUserId(token);
