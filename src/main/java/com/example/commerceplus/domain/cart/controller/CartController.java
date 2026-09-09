@@ -18,16 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/carts")
 public class CartController {
-    private final CartService cartService;
+
     private final CartFacade cartFacade;
 
 @PatchMapping("/{productId}")
     public ResponseEntity<ApiResponse<Void>> addItem(
-      @AuthenticationPrincipal JwtUser jwtUser,
+      @Auth Long memberId,
         @PathVariable Long productId,
         @RequestBody @Valid AddCartItemRequest request
     ) {
-    cartFacade.addItem(jwtUser.id(), productId, request.quantity());
+    cartFacade.addItem(memberId, productId, request.quantity());
     return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok());
     }
 }
