@@ -4,6 +4,7 @@ import com.example.commerceplus.common.api.ApiResponse;
 import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.domain.product.dto.condition.SearchProductCondition;
 import com.example.commerceplus.domain.product.dto.response.GetAllProductResponse;
+import com.example.commerceplus.domain.product.dto.response.GetProductResponse;
 import com.example.commerceplus.domain.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,4 +34,8 @@ public class ProductController {
         )));
     }
 
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<ApiResponse<GetProductResponse>> getProduct(@PathVariable Long productId) {
+        return ResponseEntity.ok(ApiResponse.ok(productService.findProduct(productId)));
+    }
 }

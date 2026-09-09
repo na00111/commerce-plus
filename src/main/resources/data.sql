@@ -1,4 +1,4 @@
-INSERT INTO products (name, price, stock, comment, category, created_at, updated_at) VALUES
+INSERT INTO products (name, price, stock, comment, category, created_at, modified_at) VALUES
                                                                                          ('여름 티셔츠', 19000, 120, '통기성 좋은 티셔츠', 'FASHION', '2026-08-01 10:00:00', '2026-08-01 10:00:00'),
                                                                                          ('청바지', 39000, 80, '슬림핏 청바지', 'FASHION', '2026-08-02 10:00:00', '2026-08-02 12:00:00'),
                                                                                          ('원피스', 52000, 60, '여름 원피스', 'FASHION', '2026-08-03 10:00:00', '2026-08-03 10:00:00'),

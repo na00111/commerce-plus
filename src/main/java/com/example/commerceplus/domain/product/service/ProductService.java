@@ -3,6 +3,7 @@ package com.example.commerceplus.domain.product.service;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.product.dto.condition.SearchProductCondition;
+import com.example.commerceplus.domain.product.dto.response.GetProductResponse;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,18 @@ public class ProductService {
         }
 
        return productRepository.findProductsByCondition(pageable, condition);
+    }
+
+    @Transactional(readOnly = true)
+    public GetProductResponse findProduct(Long productId) {
+
+        boolean isExistsProduct = productRepository.existsById(productId);
+        if (!isExistsProduct) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        Product product = productRepository.findById(productId).get();
+        return GetProductResponse.from(product);
     }
 
 }
