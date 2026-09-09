@@ -50,12 +50,12 @@ public class ProductService {
         return GetProductResponse.from(product);
     }
 
-    @Transactional // 동시성 제연을 위해 락이 없는 버전
+    // 동시성 제연을 위해 락이 없는 버전
     public Product findProductById(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    @Transactional // 동시성을 막기 위한 비관적 락을 사용한 버전
+    // 동시성을 막기 위한 비관적 락을 사용한 버가
     public Product findProductByIdWithLock(Long productId) {
         return productRepository.findByIdWithLock(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
