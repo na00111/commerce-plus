@@ -23,11 +23,11 @@ public class CartController {
 
 @PatchMapping("/{productId}")
     public ResponseEntity<ApiResponse<Void>> addItem(
-      @AuthenticationPrincipal Long memberId,
+      @AuthenticationPrincipal JwtUser jwtUser,
         @PathVariable Long productId,
         @RequestBody @Valid AddCartItemRequest request
     ) {
-    cartFacade.addItem(memberId,productId, request.quantity());
+    cartFacade.addItem(jwtUser.id(), productId, request.quantity());
     return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok());
     }
 }
