@@ -42,7 +42,6 @@ public class ProductService {
         return GetProductResponse.from(product);
     }
 
-    @Transactional
     public GetProductResponse updateProduct(Long productId, PatchProductRequest request) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
         product.updateProduct(request.name(),  request.price(), request.comment(), request.category());
