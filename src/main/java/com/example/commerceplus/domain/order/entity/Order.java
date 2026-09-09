@@ -34,12 +34,26 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @Column(nullable = false, unique = true)
+    private String orderNumber;
+
 
     // 주문 객체 초기화 하면서 주문과 상품 항목들 연결
-    public Order(Member member, int totalPrice, List<OrderItem> orderItems) {
+    public Order(Member member, int totalPrice, List<OrderItem> orderItems, String orderNumber) {
         this.member = member;
         this.totalPrice = totalPrice;
+        this.status = OrderStatus.PAYMENT_PENDING;
+        this.orderNumber = orderNumber;
         orderItems.forEach(this::addOrderItem);
+    }
+
+    public static Order create(
+            Member member,
+            int totalPrice,
+            List<OrderItem> orderItems,
+            String orderNumber
+    ) {
+        return new Order(member, totalPrice, orderItems, orderNumber);
     }
 
 
@@ -51,15 +65,19 @@ public class Order extends BaseTimeEntity {
 
     // 주문에 상품을 추가하면서 양방향 관계 맺기
     public void addOrderItem(OrderItem orderItem) {
-        this.orderItems.add(orderItem);
+        orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
 
     // 주문을 사람이 읽을 수 있는 이름으로 표현
     public String getOrderName() {
-        if (orderItems.isEmpty()) return "주문";
-        String firstName = orderItems.get(0).getProductName();
-        if (orderItems.size() == 1) return firstName;
+        if (orderItems.isEmpty()) {
+            return "주문";
+        }
+        String firstName = orderItems.getFirst().getProductName();
+        if (orderItems.size() == 1) {
+            return firstName;
+        }
         return firstName + " 외 " + (orderItems.size() - 1) + "건";
     }
 }
