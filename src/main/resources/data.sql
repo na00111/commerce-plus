@@ -38,3 +38,26 @@ INSERT INTO products (name, price, stock, comment, category, created_at, modifie
                                                                                          ('여행 파우치', 16000, 180, '소형 파우치', 'ETC', '2026-08-30 10:00:00', '2026-08-30 10:00:00'),
                                                                                          ('청소용 솔', 7000, 220, '틈새 청소', 'ETC', '2026-08-31 10:00:00', '2026-09-01 09:00:00'),
                                                                                          ('충전 케이블', 18000, 140, '내구성 좋은 케이블', 'ETC', '2026-09-01 10:00:00', '2026-09-01 10:00:00');
+
+INSERT INTO members
+(created_at, modified_at, name, password, email, phone_number, role, status)
+VALUES
+-- ADMIN (ACTIVE, INACTIVE 2개씩)
+(NOW(6), NOW(6), 'admin1', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'admin1@test.com', '010-0000-0001', 'ADMIN', 'ACTIVE'),
+(NOW(6), NOW(6), 'admin2', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'admin2@test.com', '010-0000-0002', 'ADMIN', 'INACTIVE'),
+
+-- CS_ADMIN
+(NOW(6), NOW(6), 'cs_admin1', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'cs1@test.com', '010-0000-0101', 'CS_ADMIN', 'ACTIVE'),
+(NOW(6), NOW(6), 'cs_admin2', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'cs2@test.com', '010-0000-0102', 'CS_ADMIN', 'INACTIVE'),
+
+-- MK_ADMIN
+(NOW(6), NOW(6), 'mk_admin1', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'mk1@test.com', '010-0000-0201', 'MK_ADMIN', 'ACTIVE'),
+(NOW(6), NOW(6), 'mk_admin2', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'mk2@test.com', '010-0000-0202', 'MK_ADMIN', 'INACTIVE'),
+
+-- NORMAL (ACTIVE만 2개)
+(NOW(6), NOW(6), 'normal1', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'normal1@test.com', '010-0000-0301', 'NORMAL', 'ACTIVE'),
+(NOW(6), NOW(6), 'normal2', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'normal2@test.com', '010-0000-0302', 'NORMAL', 'ACTIVE'),
+
+-- OP_ADMIN
+(NOW(6), NOW(6), 'op_admin1', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'op1@test.com', '010-0000-0401', 'OP_ADMIN', 'ACTIVE'),
+(NOW(6), NOW(6), 'op_admin2', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'op2@test.com', '010-0000-0402', 'OP_ADMIN', 'INACTIVE');
