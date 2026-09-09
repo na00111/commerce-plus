@@ -2,8 +2,8 @@ package com.example.commerceplus.domain.order.service;
 
 import com.example.commerceplus.domain.cart.repository.CartRepository;
 import com.example.commerceplus.domain.member.entity.Member;
-import com.example.commerceplus.domain.order.dto.OrderCreateRequest;
-import com.example.commerceplus.domain.order.dto.OrderCreateResponse;
+import com.example.commerceplus.domain.order.dto.request.OrderCreateRequest;
+import com.example.commerceplus.domain.order.dto.response.OrderCreateResponse;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.order.repository.OrderRepository;
