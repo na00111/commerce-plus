@@ -68,6 +68,13 @@ public class Product extends BaseTimeEntity {
         return this.stock >= stock;
     }
 
+    public void updateProduct(String name, int price, String comment, ProductCategory category){
+        this.name = name;
+        this.price = price;
+        this.comment = comment;
+        this.category = category;
+    }
+
     private void isStockLessThanOne(int stock) {
         if (stock < 1) {
             throw new BusinessException(ErrorCode.INVALID_STOCK);

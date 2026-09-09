@@ -28,7 +28,8 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
+//                                .requestMatchers("/api/product/**").hasAnyRole("ADMIN", "OP_ADMIN")
+                                .requestMatchers("/**").permitAll()
 //                        .requestMatchers("/auth/**").permitAll()
 //                        .requestMatchers("/product/**").permitAll()
 //                        .requestMatchers("/subscriptions/**").permitAll()
