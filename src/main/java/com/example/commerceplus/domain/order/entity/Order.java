@@ -34,6 +34,8 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    private String orderNumber;
+
 
     // 주문 객체 초기화 하면서 주문과 상품 항목들 연결
     public Order(Member member, int totalPrice, List<OrderItem> orderItems) {
