@@ -102,4 +102,11 @@ public class MemberService {
        return new LoginMemberResponse(token);
     }
 
+    @Transactional(readOnly = true)
+    public Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+
+
 }
