@@ -3,6 +3,7 @@ package com.example.commerceplus.domain.product.service;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.product.dto.condition.SearchProductCondition;
+import com.example.commerceplus.domain.product.dto.request.PatchProductRequest;
 import com.example.commerceplus.domain.product.dto.response.GetProductResponse;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.repository.ProductRepository;
@@ -41,4 +42,10 @@ public class ProductService {
         return GetProductResponse.from(product);
     }
 
+    public GetProductResponse updateProduct(Long productId, PatchProductRequest request) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.updateProduct(request.name(),  request.price(), request.comment(), request.category());
+        productRepository.save(product);
+        return GetProductResponse.from(product);
+    }
 }
