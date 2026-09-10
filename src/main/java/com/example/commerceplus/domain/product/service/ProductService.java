@@ -9,6 +9,8 @@ import com.example.commerceplus.domain.product.dto.response.GetProductResponse;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,8 +29,18 @@ public class ProductService {
         if (condition.isMinPriceGreaterThanMaxPrice()) {
             throw new BusinessException(ErrorCode.INVALID_PRICE_RANGE);
         }
-
        return productRepository.findProductsByCondition(pageable, condition);
+    }
+
+    @Cacheable(value = "product_condition", key = "#condition.getCacheKey()"
+    )
+    @Transactional(readOnly = true)
+    public Page<SearchProductConditionResponse> findProductAllWitCache(Pageable pageable, SearchProductConditionRequest condition) {
+
+        if (condition.isMinPriceGreaterThanMaxPrice()) {
+            throw new BusinessException(ErrorCode.INVALID_PRICE_RANGE);
+        }
+        return productRepository.findProductsByCondition(pageable, condition);
     }
 
     @Transactional(readOnly = true)
@@ -43,6 +55,7 @@ public class ProductService {
         return GetProductResponse.from(product);
     }
 
+    @CacheEvict(value = "product_condition",  allEntries = true )
     public GetProductResponse updateProduct(Long productId, PatchProductRequest request) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
         product.updateProduct(request.name(),  request.price(), request.comment(), request.category());

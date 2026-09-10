@@ -53,8 +53,30 @@ public class CartFacade {
         Optional<Cart> cart = cartService.findCart(memberId);
 
         if (cart.isEmpty()) {
-            return new CartResponse(List.of() , 0);
+            return new CartResponse(null, List.of());
         }
         return cartItemService.getCartItems(cart.get());
+    }
+
+    public  int UpdateCartItemQuantity(Long memberId, Long productId, int quantity) {
+        //회원 조회
+        Member member = memberService.findMemberById(memberId);
+        //회원의 장바구니 조회
+        Cart cart = cartService.findCart(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+        return cartItemService.UpdateQuantity(cart, productId, quantity);
+    }
+
+    public void deleteCartItem(Long memberId, Long cartItemId) {
+        //회원 존재 확인
+        memberService.findMemberById(memberId);
+        //장바구 상품 삭제
+        cartItemService.deleteCatItem(memberId, cartItemId);
+    }
+    public void deleteAllCartItems(Long memberId) {
+        //회원 존재 확인
+        Member member = memberService.findMemberById(memberId);
+        //장바구니 전체 삭제
+        cartItemService.deleteAllCartItem(memberId);
     }
 }

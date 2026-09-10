@@ -1,7 +1,9 @@
 package com.example.commerceplus.domain.product.controller;
 
+import com.example.commerceplus.common.annotation.Auth;
 import com.example.commerceplus.common.api.ApiResponse;
 import com.example.commerceplus.common.api.PageResponse;
+import com.example.commerceplus.common.jwt.JwtUser;
 import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionRequest;
 import com.example.commerceplus.domain.product.dto.request.PatchProductRequest;
 import com.example.commerceplus.domain.product.dto.response.GetAllProductResponse;
@@ -25,9 +27,21 @@ public class ProductController {
             @Valid SearchProductConditionRequest condition )
 
     {
+
         Pageable pageable = PageRequest.of(condition.page(), condition.size());
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
                 productService.findProductAll(pageable, condition),
+                GetAllProductResponse::from
+        )));
+    }
+
+    @GetMapping("/products/cache")
+    public ResponseEntity<ApiResponse<PageResponse<GetAllProductResponse>>> getProductAllWithCache(
+            @Valid SearchProductConditionRequest condition )
+    {
+        Pageable pageable = PageRequest.of(condition.page(), condition.size());
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
+                productService.findProductAllWitCache(pageable, condition),
                 GetAllProductResponse::from
         )));
     }
