@@ -4,7 +4,6 @@ import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.cart.dto.response.CartResponse;
 import com.example.commerceplus.domain.cart.entity.Cart;
-import com.example.commerceplus.domain.cart.entity.CartItem;
 import com.example.commerceplus.domain.cart.service.CartItemService;
 import com.example.commerceplus.domain.cart.service.CartService;
 import com.example.commerceplus.domain.member.entity.Member;
@@ -19,7 +18,6 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-
 public class CartFacade {
 
     private final ProductService productService;
@@ -73,6 +71,7 @@ public class CartFacade {
         //장바구 상품 삭제
         cartItemService.deleteCatItem(memberId, cartItemId);
     }
+
     public void deleteAllCartItems(Long memberId) {
         //회원 존재 확인
         Member member = memberService.findMemberById(memberId);
