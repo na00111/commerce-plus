@@ -1,7 +1,6 @@
 package com.example.commerceplus.domain.product.dto.response;
 
 import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionResponse;
-import com.example.commerceplus.domain.product.entity.Product;
 
 public record GetAllProductResponse(
         Long id,
