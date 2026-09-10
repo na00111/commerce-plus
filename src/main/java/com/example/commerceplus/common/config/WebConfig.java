@@ -1,5 +1,6 @@
 package com.example.commerceplus.common.config;
 
+import com.example.commerceplus.common.annotation.JwtUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -11,8 +12,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
+    private final JwtUserArgumentResolver jwtUserArgumentResolver;
+
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        WebMvcConfigurer.super.addArgumentResolvers(resolvers);
+        resolvers.add(jwtUserArgumentResolver);
     }
 }

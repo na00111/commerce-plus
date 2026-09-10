@@ -7,12 +7,16 @@ import com.example.commerceplus.common.jwt.JwtUser;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Slf4j(topic = "argumentResolver")
+@Component
 public class JwtUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
@@ -29,10 +33,7 @@ public class JwtUserArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public @Nullable Object resolveArgument(MethodParameter parameter, Message<?> message)
-            throws Exception
-    {
-
+    public @Nullable Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null ) {
