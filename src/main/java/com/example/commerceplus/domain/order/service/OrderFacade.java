@@ -1,5 +1,8 @@
 package com.example.commerceplus.domain.order.service;
 
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
+import com.example.commerceplus.domain.cart.entity.Cart;
 import com.example.commerceplus.domain.cart.entity.CartItem;
 import com.example.commerceplus.domain.cart.service.CartItemService;
 import com.example.commerceplus.domain.cart.service.CartService;
@@ -34,7 +37,9 @@ public class OrderFacade {
     private final CartItemService cartItemService;
 
     public GetCheckoutResponse getCheckoutOne(Long memberId, List<Long> cartItemIds) {
-        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(memberId, cartItemIds);
+        Member member = memberService.findMemberById(memberId);
+        Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, cartItemIds);
         List<GetCheckoutResponse.CheckoutItem> items = cartItems.stream()
                 .map(GetCheckoutResponse.CheckoutItem::from)
                 .toList();
@@ -49,7 +54,8 @@ public class OrderFacade {
     @Transactional
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
         Member member = memberService.findMemberById(memberId);
-        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(memberId, request.cartItemIds());
+        Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, request.cartItemIds());
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
