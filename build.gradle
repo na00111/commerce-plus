@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -40,6 +40,10 @@ dependencies {
 
     // mvc
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+    // cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 
     // QueryDSL (OpenFeign 보안 취약점 패치 버전)
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.10.1'
