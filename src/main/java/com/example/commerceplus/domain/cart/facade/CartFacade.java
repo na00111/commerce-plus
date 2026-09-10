@@ -57,4 +57,13 @@ public class CartFacade {
         }
         return cartItemService.getCartItems(cart.get());
     }
+
+    public  int UpdateCartItemQuantity(Long memberId, Long productId, int quantity) {
+        //회원 조회
+        Member member = memberService.findMemberById(memberId);
+        //회원의 장바구니 조회
+        Cart cart = cartService.findCart(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+        return cartItemService.UpdateQuantity(cart, productId, quantity);
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.commerceplus.domain.cart.service;
 
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.cart.dto.response.CartItemResponse;
 import com.example.commerceplus.domain.cart.dto.response.CartResponse;
 import com.example.commerceplus.domain.cart.entity.Cart;
@@ -41,8 +43,8 @@ public class CartItemService {
     }
 
     //장바구에 담긴 상품 조회
-@Transactional(readOnly = true)
-public CartResponse getCartItems(Cart cart) {
+   @Transactional(readOnly = true)
+   public CartResponse getCartItems(Cart cart) {
          List<CartItem> cartItems = cartItemRepository.findByCart(cart);
          return CartResponse.from(cartItems);
 }
@@ -50,6 +52,15 @@ public CartResponse getCartItems(Cart cart) {
     public int getExistingQuantity(Cart cart, Product product) {
         Integer countedQuantity = cartItemRepository.sumQuantityByCartAndProduct(cart, product);
         return (countedQuantity != null)? countedQuantity : 0;
+    }
+    @Transactional
+    public int UpdateQuantity(Cart cart, Long cartItemId, int quantity) {
+        //타인의 아이템 수정 방지
+        CartItem cartItem = cartItemRepository.findByIdAndCart(cartItemId,cart)
+                .orElseThrow(()->new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
+        //수량 변경
+        cartItem.changeQuantity(quantity);
+        return cartItem.getQuantity();
     }
 
     private List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {

@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+
+    Optional<CartItem> findByIdAndCart(Long id, Cart cart);
+
     // [Cart, Order ] 장바구니에 담긴 상품들을 조회
     @Query(" SELECT c FROM CartItem c LEFT JOIN FETCH c.product p WHERE c.cart = :cart")
     List<CartItem> findByCart(@Param("cart") Cart cart);
