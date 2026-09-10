@@ -82,7 +82,7 @@ public class MemberService {
        Optional<Member> findMember = memberRepository.findByEmail(request.email());
 
        if (findMember.isEmpty()) {
-           throw new BusinessException(ErrorCode.UNAUTHORIZED);
+           throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
        }
 
        Member member = findMember.get();
@@ -90,7 +90,7 @@ public class MemberService {
        boolean matches = passwordEncoder.matches(request.password(), member.getPassword());
 
        if (!matches) {
-           throw new BusinessException(ErrorCode.UNAUTHORIZED);
+           throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
        }
 
         if (member.getStatus() == MemberStatus.INACTIVE) {
