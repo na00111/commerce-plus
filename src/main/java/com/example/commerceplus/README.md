@@ -1,7 +1,7 @@
 
 # 인덱스 
 
-테스트 결과 인덱스는 4번 테스트에서 가장 좋은 평가를 받은 (category,created_at)로 선택을 하였다.
+테스트 결과 인덱스는 3번 테스트에서 가장 좋은 평가를 받은 (category,created_at)로 선택을 하였다.
 
 이유는 시나리오 A, B에 대하여 행이 5만 -> 5천으로 줄었으며
 Using filesort 가 가장 적으면서 인덱스를 넣어야 할게 category와 created_at 밖에 없기 때문이다.
@@ -50,6 +50,14 @@ ALTER TABLE products ADD INDEX idx_category_created (category, created_at);
 3. 시나리오 C (가격만+정렬)
    - type: ALL  / rows: 49820 / Extra: Using where; Using filesort / time 28.28
 
+■ 3-1. 인덱스 (category,created_at) 조건을 좁게
+
+type: ref / rows: 4945 / Extra: Using where; Backward index scan / time=24.1
+
+■ 인덱스 (category,created_at) 조건을 넓게
+
+type: ref / rows: 5088 / Extra: Using where; Backward index scan / time=1.47
+
 ---
 
 ■ 4. 테스트 상태: 인덱스 (category,created_at, price) 적용 후
@@ -65,12 +73,26 @@ ALTER TABLE products ADD INDEX idx_category_created (category, created_at);
 
 ---
 
-■ 인덱스 (category,created_at) 조건을 좁 
+# 캐시 
 
-type: ref / rows: 4945 / Extra: Using where; Backward index scan / time=24.1
+전체 상품 조회 dto는 모든 클라이언트의 첫 페이지에서 항상 조회가 되는 데이터이고
+조건 검색과 page 조회 또한 가장 많이 일어나는 조회이기 때문에 캐싱을 선택하였다.
 
-■ 인덱스 (category,created_at) 조건을 좁게
+물론, 전체 상품 조회에서 캐시 불일치 확률이 큰 '재고'는 캐시에서 제외하고
+상품 단건 조회에만 상품의 재고를 전달하게 하였다.
 
-type: ref / rows: 5088 / Extra: Using where; Backward index scan / time=1.47
+
+---
+
+■ 1. 캐시가 없는 조회
+
+1. 첫 번째 조회 : 651ms
+2. 두 번쨔 조회 : 66ms
+3. 세 번째 조회 : 35ms
 
 
+■ 2. 캐시가 있는 조회
+
+1. 첫 번째 조회 : 508ms
+2. 두 번쨔 조회 : 25ms
+3. 세 번째 조회 : 6ms
