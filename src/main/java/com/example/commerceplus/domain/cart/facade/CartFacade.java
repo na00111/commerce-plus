@@ -66,4 +66,12 @@ public class CartFacade {
                 .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
         return cartItemService.UpdateQuantity(cart, productId, quantity);
     }
+
+    public void deleteCartItem(Long memberId, Long cartItemId) {
+        //회원 존재 확인
+        memberService.findMemberById(memberId);
+        //장바구 상품 삭제
+        cartItemService.deleteCatItem(memberId, cartItemId);
+
+    }
 }

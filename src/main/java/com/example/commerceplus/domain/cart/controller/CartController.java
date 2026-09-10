@@ -47,4 +47,10 @@ public class CartController {
     UpdateCartItemQuantityResponse response = UpdateCartItemQuantityResponse.of(updatedQuantity);
     return ResponseEntity.ok(ApiResponse.ok(response));
     }
+    @DeleteMapping("/items/{cartItemId}")
+    public ResponseEntity<Void> deleteCartItem(@Auth JwtUser user,@PathVariable Long cartItemId) {
+    cartFacade.deleteCartItem(user.id(), cartItemId);
+    return ResponseEntity.noContent().build();
+    }
+
 }

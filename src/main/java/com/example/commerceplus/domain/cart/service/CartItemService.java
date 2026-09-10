@@ -62,6 +62,17 @@ public class CartItemService {
         cartItem.changeQuantity(quantity);
         return cartItem.getQuantity();
     }
+    @Transactional
+    public void deleteCatItem(Long memberId, Long cartItemId) {
+        //db 벌크 삭제
+        int deleteCount = cartItemRepository.deleteByIdAndMemberId(cartItemId, memberId);
+
+        if (deleteCount == 0) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+    }
+
+
 
     private List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {
         return null;
