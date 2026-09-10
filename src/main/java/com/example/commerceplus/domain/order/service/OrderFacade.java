@@ -1,5 +1,6 @@
 package com.example.commerceplus.domain.order.service;
 
+import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.domain.cart.entity.CartItem;
 import com.example.commerceplus.domain.cart.service.CartItemService;
 import com.example.commerceplus.domain.cart.service.CartService;
@@ -8,6 +9,7 @@ import com.example.commerceplus.domain.member.sevice.MemberService;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
 import com.example.commerceplus.domain.order.dto.response.CreateOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
+import com.example.commerceplus.domain.order.dto.response.GetOrderResponse;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.payment.entity.Payment;
@@ -15,6 +17,8 @@ import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,5 +70,17 @@ public class OrderFacade {
 
         // 결제 성공 시점까지 장바구니는 유지한다.
         return CreateOrderResponse.from(order, payment);
+    }
+
+    // 내 주문 목록 조회
+    public PageResponse<GetOrderResponse> getOrdersAll(Long memberId, Pageable pageable) {
+        Page<GetOrderResponse> orders = orderService.findOrdersByMemberId(memberId, pageable)
+                .map(order -> {
+                    // PaymentService에서 주문 ID로 Payment 객체 조회하기
+                    Payment payment = paymentService.findPaymentByOrderId(order.getId())
+                            .orElse(null);
+                    return GetOrderResponse.from(order, payment);
+                });
+        return PageResponse.from(orders);
     }
 }
