@@ -22,7 +22,7 @@ public class CartController {
 
     private final CartFacade cartFacade;
 
-@PatchMapping("/{productId}")
+    @PatchMapping("/{productId}")
     public ResponseEntity<ApiResponse<AddCartItemResponse>> addItem(
       @Auth JwtUser user,
         @PathVariable Long productId,
@@ -37,6 +37,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> getCart(@Auth JwtUser user) {
     return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(cartFacade.getCart(user.id())));
     }
+
     @PatchMapping("/items/{cartItemId}")
     public ResponseEntity<ApiResponse<UpdateCartItemQuantityResponse>>  updateItemQuantity(
             @Auth JwtUser user,
@@ -47,12 +48,14 @@ public class CartController {
     UpdateCartItemQuantityResponse response = UpdateCartItemQuantityResponse.of(updatedQuantity);
     return ResponseEntity.ok(ApiResponse.ok(response));
     }
+
     @DeleteMapping("/items/{cartItemId}")
     public ResponseEntity<Void> deleteCartItem(@Auth JwtUser user,@PathVariable Long cartItemId) {
     cartFacade.deleteCartItem(user.id(), cartItemId);
     return ResponseEntity.noContent().build();
     }
-    @DeleteMapping
+
+    @DeleteMapping("/items")
     public ResponseEntity<Void> deleteAllCartItem(@Auth JwtUser user) {
     cartFacade.deleteAllCartItems(user.id());
     return ResponseEntity.noContent().build();

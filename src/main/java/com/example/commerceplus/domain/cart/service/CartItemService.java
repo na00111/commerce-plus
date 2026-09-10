@@ -2,13 +2,10 @@ package com.example.commerceplus.domain.cart.service;
 
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
-import com.example.commerceplus.domain.cart.dto.response.CartItemResponse;
 import com.example.commerceplus.domain.cart.dto.response.CartResponse;
 import com.example.commerceplus.domain.cart.entity.Cart;
 import com.example.commerceplus.domain.cart.entity.CartItem;
-
 import com.example.commerceplus.domain.cart.repository.CartItemRepository;
-import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class CartItemService {
+
     private final CartItemRepository cartItemRepository;
 
-    @Transactional
     public int addItem(Cart cart,
                         Product product,
                         int quantity) {
@@ -48,12 +45,13 @@ public class CartItemService {
          List<CartItem> cartItems = cartItemRepository.findByCart(cart);
          return CartResponse.from(cart, cartItems);
 }
+
     @Transactional(readOnly = true )//장바구니에 상품이 몇개 담겼는지
     public int getExistingQuantity(Cart cart, Product product) {
         Integer countedQuantity = cartItemRepository.sumQuantityByCartAndProduct(cart, product);
         return (countedQuantity != null)? countedQuantity : 0;
     }
-    @Transactional
+
     public int UpdateQuantity(Cart cart, Long cartItemId, int quantity) {
         //타인의 아이템 수정 방지
         CartItem cartItem = cartItemRepository.findByIdAndCart(cartItemId,cart)
@@ -62,7 +60,7 @@ public class CartItemService {
         cartItem.changeQuantity(quantity);
         return cartItem.getQuantity();
     }
-    @Transactional
+
     public void deleteCatItem(Long memberId, Long cartItemId) {
         //db 벌크 삭제
         int deleteCount = cartItemRepository.deleteByIdAndMemberId(cartItemId, memberId);
@@ -71,12 +69,11 @@ public class CartItemService {
             throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
     }
-    @Transactional
+
     public void deleteAllCartItem(Long memberId) {
         //회원 아이디를 기반으 해당으로 회의 모든 장바구니 아이템을 벌크 삭제
         cartItemRepository.deleteAllByMemberId(memberId);
     }
-
 
     public List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {
         return null;
