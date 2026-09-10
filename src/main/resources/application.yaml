@@ -3,7 +3,7 @@ spring:
     name: commerceplus
 
   datasource:
-    url: jdbc:mysql://localhost:3306/commerceplus?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/commerceplus?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
