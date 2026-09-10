@@ -53,7 +53,7 @@ public class CartFacade {
         Optional<Cart> cart = cartService.findCart(memberId);
 
         if (cart.isEmpty()) {
-            return new CartResponse(List.of() , 0);
+            return new CartResponse(null, List.of());
         }
         return cartItemService.getCartItems(cart.get());
     }

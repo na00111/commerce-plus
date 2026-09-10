@@ -45,6 +45,6 @@ public class CartController {
             ) {
     int updatedQuantity = cartFacade.UpdateCartItemQuantity(user.id(), cartItemId, request.quantity());
     UpdateCartItemQuantityResponse response = UpdateCartItemQuantityResponse.of(updatedQuantity);
-    return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(response));
+    return ResponseEntity.ok(ApiResponse.ok(response));
     }
 }
