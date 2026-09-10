@@ -61,3 +61,6 @@ VALUES
 -- OP_ADMIN
 (NOW(6), NOW(6), 'op_admin1', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'op1@test.com', '010-0000-0401', 'OP_ADMIN', 'ACTIVE'),
 (NOW(6), NOW(6), 'op_admin2', '$2a$12$kykskXV0WE0k580abp.pJ.y4WT.sv/n4yJgRECztqjSLVIQuFfymm', 'op2@test.com', '010-0000-0402', 'OP_ADMIN', 'INACTIVE');
+
+-- 인덱스 추가 카테고리 + 생성일
+ALTER TABLE products ADD INDEX idx_category_created (category, created_at);

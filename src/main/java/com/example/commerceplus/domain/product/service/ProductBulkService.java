@@ -50,10 +50,6 @@ public class ProductBulkService {
             // 랜덤 카테고리 Enum 선택
             ProductCategory category = categories[random.nextInt(categories.length)];
 
-            // 랜덤 날짜 (현재 시간 기준으로 최대 30일 전까지 랜덤하게 분산)
-            LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(0, 31));
-            LocalDateTime modifiedAt = random.nextBoolean() ? createdAt.plusHours(random.nextInt(1, 24)) : null;
-
             // 객체 생성 후 리스트에 add
             products.add(new Product(name, price, stock, comment, category));
         }
