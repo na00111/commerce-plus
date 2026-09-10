@@ -4,7 +4,9 @@ import com.example.commerceplus.common.annotation.Auth;
 import com.example.commerceplus.common.api.ApiResponse;
 import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.common.jwt.JwtUser;
+import com.example.commerceplus.domain.order.dto.request.CancelOrderRequest;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
+import com.example.commerceplus.domain.order.dto.response.CancelOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.CreateOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
 import com.example.commerceplus.domain.order.dto.response.GetOrderResponse;
@@ -70,7 +72,19 @@ public class OrderController {
     }
 
     // 주문 취소
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<ApiResponse<CancelOrderResponse>> cancelOrder(
+            @Auth JwtUser jwtUser,
+            @PathVariable Long orderId,
+            @Valid @RequestBody CancelOrderRequest request
+    ) {
+        Long memberId = jwtUser.id();
 
+        CancelOrderResponse response =
+                orderFacade.cancelOrder(memberId, orderId, request);
+
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
 
 }
 

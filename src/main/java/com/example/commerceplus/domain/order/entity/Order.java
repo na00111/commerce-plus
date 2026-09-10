@@ -80,4 +80,9 @@ public class Order extends BaseTimeEntity {
         }
         return firstName + " 외 " + (orderItems.size() - 1) + "건";
     }
+
+    // 취소 가능한 상태 검증
+    public void cancel() {
+        this.status = OrderStatus.CANCELED;
+    }
 }

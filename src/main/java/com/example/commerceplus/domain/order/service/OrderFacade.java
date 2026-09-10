@@ -8,12 +8,15 @@ import com.example.commerceplus.domain.cart.service.CartItemService;
 import com.example.commerceplus.domain.cart.service.CartService;
 import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.member.sevice.MemberService;
+import com.example.commerceplus.domain.order.dto.request.CancelOrderRequest;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
+import com.example.commerceplus.domain.order.dto.response.CancelOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.CreateOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
 import com.example.commerceplus.domain.order.dto.response.GetOrderResponse;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
+import com.example.commerceplus.domain.order.repository.OrderRepository;
 import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
@@ -26,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.commerceplus.domain.order.entity.QOrder.order;
 
 @Component
 @RequiredArgsConstructor
@@ -96,7 +101,23 @@ public class OrderFacade {
     }
 
     // 주문 취소
+    public CancelOrderResponse cancelOrder(
+            Long memberId,
+            Long orderId,
+            CancelOrderRequest request
+    ) {
+        Order order = OrderRepository
+                .findByIdAndMemberId(orderId, memberId)
+                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
 
+        // TODO: 취소 가능 상태 검증
+        // TODO: 주문 상품 재고 복구
+        // TODO: 결제 상태 변경
+
+        order.cancel();
+
+        return CancelOrderResponse.from(order);
+    }
 
 
 
