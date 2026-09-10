@@ -1,5 +1,7 @@
 package com.example.commerceplus.domain.cart.service;
 
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.cart.dto.response.CartItemResponse;
 import com.example.commerceplus.domain.cart.dto.response.CartResponse;
 import com.example.commerceplus.domain.cart.entity.Cart;
@@ -41,8 +43,8 @@ public class CartItemService {
     }
 
     //장바구에 담긴 상품 조회
-@Transactional(readOnly = true)
-public CartResponse getCartItems(Cart cart) {
+   @Transactional(readOnly = true)
+   public CartResponse getCartItems(Cart cart) {
          List<CartItem> cartItems = cartItemRepository.findByCart(cart);
          return CartResponse.from(cartItems);
 }
@@ -51,6 +53,30 @@ public CartResponse getCartItems(Cart cart) {
         Integer countedQuantity = cartItemRepository.sumQuantityByCartAndProduct(cart, product);
         return (countedQuantity != null)? countedQuantity : 0;
     }
+    @Transactional
+    public int UpdateQuantity(Cart cart, Long cartItemId, int quantity) {
+        //타인의 아이템 수정 방지
+        CartItem cartItem = cartItemRepository.findByIdAndCart(cartItemId,cart)
+                .orElseThrow(()->new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
+        //수량 변경
+        cartItem.changeQuantity(quantity);
+        return cartItem.getQuantity();
+    }
+    @Transactional
+    public void deleteCatItem(Long memberId, Long cartItemId) {
+        //db 벌크 삭제
+        int deleteCount = cartItemRepository.deleteByIdAndMemberId(cartItemId, memberId);
+
+        if (deleteCount == 0) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+    }
+    @Transactional
+    public void deleteAllCartItem(Long memberId) {
+        //회원 아이디를 기반으 해당으로 회의 모든 장바구니 아이템을 벌크 삭제
+        cartItemRepository.deleteAllByMemberId(memberId);
+    }
+
 
     public List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {
         return null;
