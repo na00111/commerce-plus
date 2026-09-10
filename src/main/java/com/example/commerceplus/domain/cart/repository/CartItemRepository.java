@@ -1,7 +1,11 @@
 package com.example.commerceplus.domain.cart.repository;
 
 
+import com.example.commerceplus.domain.cart.dto.response.CartItemResponse;
+import com.example.commerceplus.domain.cart.entity.Cart;
 import com.example.commerceplus.domain.cart.entity.CartItem;
+import com.example.commerceplus.domain.product.entity.Product;
+import jakarta.annotation.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +15,19 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+    // [Cart, Order ] 장바구니에 담긴 상품들을 조회
+    @Query(" SELECT c FROM CartItem c LEFT JOIN FETCH c.product p WHERE c.cart = :cart")
+    List<CartItem> findByCart(@Param("cart") Cart cart);
+
+    // 장바구니에 담긴 상품이 몇개 담겨있는지 조회
+    @Query(" SELECT SUM(c.quantity)FROM CartItem c WHERE c.cart = :cart AND c.product = :product")
+    @Nullable
+    Integer sumQuantityByCartAndProduct(@Param("cart") Cart cart, @Param("product") Product product);
+
+    // Cart와 Product조합의 CartItem 이 있는지 확인
+    @Query(" SELECT c FROM CartItem c WHERE c.cart = :cart AND c.product = :product")
+    Optional<CartItem> findByCartAndProduct(@Param("cart") Cart cart, @Param("product") Product product);
+
 
     // 회원의 모든 CartItem을 조회하면서 각 상품도 한 SQL로 함께 가져와 N+1 문제를 줄임
     @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.product WHERE ci.cart.member.id = :memberId")
@@ -36,7 +53,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Modifying
     // CartItem id 목록과 회원 id를 함께 검사해 해당 회원 소유의 선택 항목만 삭제
     @Query("DELETE FROM CartItem c WHERE c.id IN :ids AND c.cart.member.id = :memberId")
-    // 실제 삭제된 행 수를 반환하므로 요청 개수와 비교해 누락 또는 소유권 불일치를 확인할 수 있다.
+        // 실제 삭제된 행 수를 반환하므로 요청 개수와 비교해 누락 또는 소유권 불일치를 확인할 수 있다.
     int deleteAllByIdInAndMemberId(@Param("ids") List<Long> ids, @Param("memberId") Long memberId);
 
     // 실행 전 변경을 DB에 반영하고 실행 후 영속성 컨텍스트를 비워 벌크 삭제 뒤의 오래된 객체 상태를 방지합니다.
@@ -45,4 +62,5 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("DELETE FROM CartItem ci WHERE ci.cart.member.id = :memberId AND ci.product.id IN :productIds")
     // 실제 삭제된 행 수를 반환합니다. 이 메서드도 쓰기 트랜잭션 안에서 호출해야 합니다.
     int deleteAllByMemberIdAndProductIdIn(@Param("memberId") Long memberId, @Param("productIds") List<Long> productIds);
+
 }
