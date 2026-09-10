@@ -52,7 +52,7 @@ public CartResponse getCartItems(Cart cart) {
         return (countedQuantity != null)? countedQuantity : 0;
     }
 
-    private List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {
+    public List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {
         return null;
     }
 }
