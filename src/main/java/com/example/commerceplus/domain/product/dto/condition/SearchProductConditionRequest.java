@@ -1,10 +1,9 @@
 package com.example.commerceplus.domain.product.dto.condition;
 
 import com.example.commerceplus.domain.product.entity.ProductCategory;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-public record SearchProductCondition(
+public record SearchProductConditionRequest(
         @Min(0)
         Integer page,
         @Min(1)
@@ -22,7 +21,7 @@ public record SearchProductCondition(
         return minPrice > maxPrice;
     }
 
-    public SearchProductCondition {
+    public SearchProductConditionRequest {
         if (page == null) page = 0;
         if (size == null) size = 10;
     }
