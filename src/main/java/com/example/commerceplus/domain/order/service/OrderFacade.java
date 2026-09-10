@@ -44,12 +44,12 @@ public class OrderFacade {
 
     @Transactional
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
-        Member member = MemberService.findMemberById(memberId);
+        Member member = memberService.findMemberById(memberId);
         List<CartItem> cartItems = findAndValidateCartItems(memberId, request.cartItemIds());
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
-            Product product = ProductService.findProductByIdWithLock(cartItem.getProductId());
+            Product product = productService.findProductById(cartItem.getProductId());
             product.deductStock(cartItem.getQuantity());
             orderItems.add(new OrderItem(product, product.getPrice(), cartItem.getQuantity()));
         }
