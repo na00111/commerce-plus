@@ -63,16 +63,43 @@ public class CartItem extends BaseTimeEntity {
         return cart.getMember().getId();
     }
 
+
+    public static CartItem createCartItem(Cart cart, Product product, int quantity) {
+        // 1. 최소 수량 검증 (1개 이상만 담기 가능)
+        if (quantity < 1) {
+            throw new BusinessException(ErrorCode.INVALID_QUANTITY);
+        }
+
+        // 2. 상품 재고 검증 (Product의 isEnoughStock 활용)
+        if (!product.isEnoughStock(quantity)) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+
+        // 3. 빌더를 통해 최종 객체 생성 후 반환
+        return CartItem.builder()
+                .cart(cart)
+                .product(product)
+                .quantity(quantity)
+                .build();
+    }
+
     public Long getProductId() {
         return product.getId();
     }
 
     // 이미 담긴 상품을 다시 담을 때 기존 수량에 추가할 수 있는 도메인 메서드
-    public void addQuantity(int quantity) {
-        if (quantity < 1) {
+    public void addQuantity(int addQuantity) {
+        if (addQuantity < 1) {
             throw new BusinessException(ErrorCode.INVALID_QUANTITY);
         }
-        this.quantity += quantity;
+      //최종 수량 계산
+        int newTotalQuantity = this.quantity +addQuantity;
+
+        if (!this.product.isEnoughStock(newTotalQuantity)) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+
+        this.quantity = newTotalQuantity;
     }
 
     // 수량 수정 요청처럼 기존 수량을 새 값으로 교체할 때 사용하는 도메인 메서드

@@ -3,7 +3,6 @@ package com.example.commerceplus.domain.cart.service;
 
 
 import com.example.commerceplus.domain.cart.entity.Cart;
-import com.example.commerceplus.domain.cart.entity.CartItem;
 import com.example.commerceplus.domain.cart.repository.CartItemRepository;
 import com.example.commerceplus.domain.cart.repository.CartRepository;
 
@@ -25,6 +24,11 @@ public class CartService {
   public Cart findOrCreateCart (Member member) {
     return cartRepository.findByMemberId(member.getId())
             .orElseGet(() -> cartRepository.save(Cart.create(member)));
+  }
+
+  @Transactional(readOnly = true)
+  public Optional<Cart> findCart (Long memberId) {
+    return cartRepository.findByMemberId(memberId);
   }
   }
 

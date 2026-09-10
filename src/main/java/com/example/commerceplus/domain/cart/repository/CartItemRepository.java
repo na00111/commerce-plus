@@ -1,6 +1,7 @@
 package com.example.commerceplus.domain.cart.repository;
 
 
+import com.example.commerceplus.domain.cart.dto.response.CartItemResponse;
 import com.example.commerceplus.domain.cart.entity.Cart;
 import com.example.commerceplus.domain.cart.entity.CartItem;
 import com.example.commerceplus.domain.product.entity.Product;
@@ -14,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+    // [Cart, Order ] 장바구니에 담긴 상품들을 조회
+    @Query(" SELECT c FROM CartItem c LEFT JOIN FETCH c.product p WHERE c.cart = :cart")
+    List<CartItem> findByCart(@Param("cart") Cart cart);
 
     // 장바구니에 담긴 상품이 몇개 담겨있는지 조회
     @Query(" SELECT SUM(c.quantity)FROM CartItem c WHERE c.cart = :cart AND c.product = :product")
@@ -58,4 +62,5 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("DELETE FROM CartItem ci WHERE ci.cart.member.id = :memberId AND ci.product.id IN :productIds")
     // 실제 삭제된 행 수를 반환합니다. 이 메서드도 쓰기 트랜잭션 안에서 호출해야 합니다.
     int deleteAllByMemberIdAndProductIdIn(@Param("memberId") Long memberId, @Param("productIds") List<Long> productIds);
+
 }
