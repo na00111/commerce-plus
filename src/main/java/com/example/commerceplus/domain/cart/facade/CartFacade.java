@@ -72,6 +72,11 @@ public class CartFacade {
         memberService.findMemberById(memberId);
         //장바구 상품 삭제
         cartItemService.deleteCatItem(memberId, cartItemId);
-
+    }
+    public void deleteAllCartItems(Long memberId) {
+        //회원 존재 확인
+        Member member = memberService.findMemberById(memberId);
+        //장바구니 전체 삭제
+        cartItemService.deleteAllCartItem(memberId);
     }
 }

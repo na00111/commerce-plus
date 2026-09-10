@@ -71,7 +71,11 @@ public class CartItemService {
             throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
     }
-
+    @Transactional
+    public void deleteAllCartItem(Long memberId) {
+        //회원 아이디를 기반으 해당으로 회의 모든 장바구니 아이템을 벌크 삭제
+        cartItemRepository.deleteAllByMemberId(memberId);
+    }
 
 
     private List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {

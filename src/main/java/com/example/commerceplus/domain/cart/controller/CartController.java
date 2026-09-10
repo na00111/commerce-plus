@@ -52,5 +52,9 @@ public class CartController {
     cartFacade.deleteCartItem(user.id(), cartItemId);
     return ResponseEntity.noContent().build();
     }
-
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAllCartItem(@Auth JwtUser user) {
+    cartFacade.deleteAllCartItems(user.id());
+    return ResponseEntity.noContent().build();
+    }
 }
