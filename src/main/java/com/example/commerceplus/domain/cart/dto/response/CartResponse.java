@@ -8,9 +8,9 @@ public record CartResponse ( // 장바구니에 담긴 상품 리스트
                              List<CartItemResponse> cartItems,
                              // 장바구니에 담긴 상품 가격*수량의 총합
                              int totalPrice) {
-    public static CartResponse from(List<CartItem> cartItems) {
+    public static CartResponse of(List<CartItem> cartItems) {
         List<CartItemResponse> itemResponses = cartItems.stream()
-                .map(CartItemResponse::from)
+                .map(CartItemResponse::of)
                 .toList();
         int calculatedTotalPrice = itemResponses.stream()
                 .mapToInt(CartItemResponse::totalPrice)

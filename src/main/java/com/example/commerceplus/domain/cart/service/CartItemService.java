@@ -44,7 +44,7 @@ public class CartItemService {
 @Transactional(readOnly = true)
 public CartResponse getCartItems(Cart cart) {
          List<CartItem> cartItems = cartItemRepository.findByCart(cart);
-         return CartResponse.from(cartItems);
+         return CartResponse.of(cartItems);
 }
     @Transactional(readOnly = true )//장바구니에 상품이 몇개 담겼는지
     public int getExistingQuantity(Cart cart, Product product) {

@@ -2,6 +2,7 @@ package com.example.commerceplus.domain.cart.controller;
 
 import com.example.commerceplus.common.annotation.Auth;
 import com.example.commerceplus.common.api.ApiResponse;
+import com.example.commerceplus.common.jwt.JwtUser;
 import com.example.commerceplus.domain.cart.dto.request.AddCartItemRequest;
 import com.example.commerceplus.domain.cart.dto.response.AddCartItemResponse;
 import com.example.commerceplus.domain.cart.dto.response.CartResponse;
@@ -21,17 +22,17 @@ public class CartController {
 
 @PatchMapping("/{productId}")
     public ResponseEntity<ApiResponse<AddCartItemResponse>> addItem(
-      @Auth Long memberId,
+      @Auth JwtUser user,
         @PathVariable Long productId,
         @RequestBody @Valid AddCartItemRequest request
     ) {
-    int finalQuantity = cartFacade.addItem(memberId,productId, request.quantity());
+    int finalQuantity = cartFacade.addItem(user.id(),productId, request.quantity());
     AddCartItemResponse response = AddCartItemResponse.from(finalQuantity);
     return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<CartResponse>> getCart(@Auth Long memberId) {
-    return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(cartFacade.getCart(memberId)));
+    public ResponseEntity<ApiResponse<CartResponse>> getCart(@Auth JwtUser user) {
+    return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.ok(cartFacade.getCart(user.id())));
     }
 }
