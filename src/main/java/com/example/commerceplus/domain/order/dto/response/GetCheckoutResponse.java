@@ -1,6 +1,6 @@
 package com.example.commerceplus.domain.order.dto.response;
 
-정import com.example.commerceplus.domain.cart.entity.CartItem;
+import com.example.commerceplus.domain.cart.entity.CartItem;
 
 import java.util.List;
 
