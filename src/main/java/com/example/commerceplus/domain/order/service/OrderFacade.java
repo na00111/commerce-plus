@@ -1,6 +1,8 @@
 package com.example.commerceplus.domain.order.service;
 
 import com.example.commerceplus.domain.cart.entity.CartItem;
+import com.example.commerceplus.domain.cart.service.CartItemService;
+import com.example.commerceplus.domain.cart.service.CartService;
 import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.member.sevice.MemberService;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
@@ -9,6 +11,7 @@ import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.payment.entity.Payment;
+import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +31,10 @@ public class OrderFacade {
     private final OrderService orderService;
     private final PaymentService paymentService;
     private final ProductService productService;
+    private final CartItemService cartItemService;
 
     public GetCheckoutResponse getCheckoutOne(Long memberId, List<Long> cartItemIds) {
-        List<CartItem> cartItems = findAndValidateCartItems(memberId, cartItemIds);
+        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(memberId, cartItemIds);
         List<GetCheckoutResponse.CheckoutItem> items = cartItems.stream()
                 .map(GetCheckoutResponse.CheckoutItem::from)
                 .toList();
@@ -45,12 +49,12 @@ public class OrderFacade {
     @Transactional
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
         Member member = memberService.findMemberById(memberId);
-        List<CartItem> cartItems = findAndValidateCartItems(memberId, request.cartItemIds());
+        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(memberId, request.cartItemIds());
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
             Product product = productService.findProductById(cartItem.getProductId());
-            product.deductStock(cartItem.getQuantity());
+            product.decreaseStock(cartItem.getQuantity());
             orderItems.add(new OrderItem(product, product.getPrice(), cartItem.getQuantity()));
         }
 
