@@ -25,4 +25,16 @@ public record SearchProductConditionRequest(
         if (page == null) page = 0;
         if (size == null) size = 10;
     }
+
+    // 캐시에 저장할 키를 리턴
+    public String getCacheKey(){
+        return this.page + ":" +
+                this.size + ":" +
+                this.minPrice + ":" +
+                this.maxPrice + ":" +
+                ( (this.category != null)
+                        ? this.category.name()
+                        : "ALL");
+    }
+
 }
