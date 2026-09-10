@@ -2,7 +2,8 @@ package com.example.commerceplus.domain.product.service;
 
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
-import com.example.commerceplus.domain.product.dto.condition.SearchProductCondition;
+import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionRequest;
+import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionResponse;
 import com.example.commerceplus.domain.product.dto.request.PatchProductRequest;
 import com.example.commerceplus.domain.product.dto.response.GetProductResponse;
 import com.example.commerceplus.domain.product.entity.Product;
@@ -21,7 +22,7 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public Page<Product> findProductAll(Pageable pageable, SearchProductCondition condition) {
+    public Page<SearchProductConditionResponse> findProductAll(Pageable pageable, SearchProductConditionRequest condition) {
 
         if (condition.isMinPriceGreaterThanMaxPrice()) {
             throw new BusinessException(ErrorCode.INVALID_PRICE_RANGE);
