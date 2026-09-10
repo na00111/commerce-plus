@@ -10,7 +10,7 @@ public record CartItemResponse (
         int quantity,
         int totalPrice
 ) {
- public static CartItemResponse of(CartItem cartItem) {
+ public static CartItemResponse from(CartItem cartItem) {
      int itemTotalPrice = cartItem.getProduct().getPrice() * cartItem.getQuantity();
 
      return new CartItemResponse(

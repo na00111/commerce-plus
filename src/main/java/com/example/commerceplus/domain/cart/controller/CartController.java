@@ -27,7 +27,7 @@ public class CartController {
         @RequestBody @Valid AddCartItemRequest request
     ) {
     int finalQuantity = cartFacade.addItem(user.id(),productId, request.quantity());
-    AddCartItemResponse response = AddCartItemResponse.from(finalQuantity);
+    AddCartItemResponse response = AddCartItemResponse.of(finalQuantity);
     return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
