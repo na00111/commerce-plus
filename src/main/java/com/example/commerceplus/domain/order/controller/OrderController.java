@@ -59,6 +59,19 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.ok(orderFacade.getOrdersAll(memberId, pageable)));
     }
 
+    // 주문 상세 조회
+    @GetMapping("/{orderId}")
+    public ResponseEntity<ApiResponse<GetOrderResponse>> getOrderOne(
+            @Auth JwtUser jwtUser,
+            @PathVariable Long orderId
+    ) {
+        Long memberId = jwtUser.id();
+        return ResponseEntity.ok(ApiResponse.ok(orderFacade.getOrderOne(memberId, orderId)));
+    }
+
+    // 주문 취소
+
+
 }
 
 
