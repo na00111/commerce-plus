@@ -22,7 +22,7 @@ public class CartController {
 
     private final CartFacade cartFacade;
 
-    @PatchMapping("/{productId}")
+    @PostMapping("/{productId}")
     public ResponseEntity<ApiResponse<AddCartItemResponse>> addItem(
       @Auth JwtUser user,
         @PathVariable Long productId,
