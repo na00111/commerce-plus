@@ -1,6 +1,5 @@
 package com.example.commerceplus.domain.order.service;
 
-import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.cart.entity.Cart;
@@ -56,7 +55,7 @@ public class OrderFacade {
                 .mapToInt(GetCheckoutResponse.CheckoutItem::subtotal)
                 .sum();
 
-        return GetCheckoutResponse.of(items, totalPrice);
+        return GetCheckoutResponse.from(items, totalPrice);
     }
 
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
@@ -76,7 +75,7 @@ public class OrderFacade {
                 .mapToInt(OrderItem::getSubtotal)
                 .sum();
         Order order = orderService.createOrder(member, orderItems, totalPrice);
-        Payment payment = PaymentService.createPayment(order, totalPrice);
+        Payment payment = paymentService.createPayment(order);
 
         // 결제 성공 시점까지 장바구니는 유지한다.
         return CreateOrderResponse.from(order, payment);
