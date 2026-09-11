@@ -32,7 +32,4 @@ public class PaymentService {
         return paymentRepository.findByOrderId(orderId);
     }
 
-    public Optional<Payment> findPaymentByOrderId(Long id) {
-        return null;
-    }
 }
