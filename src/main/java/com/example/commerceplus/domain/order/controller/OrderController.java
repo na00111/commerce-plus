@@ -75,13 +75,12 @@ public class OrderController {
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResponse<CancelOrderResponse>> cancelOrder(
             @Auth JwtUser jwtUser,
-            @PathVariable Long orderId,
-            @Valid @RequestBody CancelOrderRequest request
+            @PathVariable Long orderId
     ) {
         Long memberId = jwtUser.id();
 
         CancelOrderResponse response =
-                orderFacade.cancelOrder(memberId, orderId, request);
+                orderFacade.cancelOrder(memberId, orderId);
 
         return ResponseEntity.ok(ApiResponse.ok(response));
     }

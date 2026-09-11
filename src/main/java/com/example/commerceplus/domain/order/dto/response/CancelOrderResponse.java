@@ -18,4 +18,11 @@ public class CancelOrderResponse {
         this.orderStatus = order.getStatus();
         this.payStatus = paymentStatus;
     }
+
+    public static CancelOrderResponse from(
+            Order order,
+            PaymentStatus paymentStatus
+    ) {
+        return new CancelOrderResponse(order, paymentStatus);
+    }
 }

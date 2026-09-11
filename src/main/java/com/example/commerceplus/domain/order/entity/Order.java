@@ -1,6 +1,8 @@
 package com.example.commerceplus.domain.order.entity;
 
 import com.example.commerceplus.common.entity.BaseTimeEntity;
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -83,6 +85,10 @@ public class Order extends BaseTimeEntity {
 
     // 취소 가능한 상태 검증
     public void cancel() {
+        if (this.status != OrderStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
         this.status = OrderStatus.CANCELED;
     }
 }
