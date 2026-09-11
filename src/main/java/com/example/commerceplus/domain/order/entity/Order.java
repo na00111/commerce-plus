@@ -4,6 +4,7 @@ import com.example.commerceplus.common.entity.BaseTimeEntity;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.member.entity.Member;
+import com.example.commerceplus.domain.payment.entity.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -99,7 +100,6 @@ public class Order extends BaseTimeEntity {
     }
 
 
-
     // 결제 부분 추가
     public void validatePaymentAmount(int requestAmount) {
         if (this.totalPrice != requestAmount) {
@@ -115,5 +115,12 @@ public class Order extends BaseTimeEntity {
         this.status = OrderStatus.COMPLETED;
     }
 
+    public void validatePaymentPending() {
+        //주문이 결제를 진행할 수 있는 상황인지
+        if (this.status != OrderStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+    }
 }
 
