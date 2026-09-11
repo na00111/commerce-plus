@@ -13,7 +13,8 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // 모의 결제 처리 시 주문 ID로 결제 조회
-    Optional<Payment> findPaymentByOrderId(Long orderId);
+    @Query("SELECT p FROM Payment p where p.order.id = :orderId")
+    Optional<Payment> findByOrderId(@Param("orderId") Long orderId);
 
     // 결제 확정 - orderId 기준 조회 (Order fetch join)
     @Query("SELECT p FROM Payment p JOIN FETCH p.order WHERE p.order.id = :orderId")
