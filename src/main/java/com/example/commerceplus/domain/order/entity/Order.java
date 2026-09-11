@@ -94,7 +94,7 @@ public class Order extends BaseTimeEntity {
 
     public void validateOwner(Long memberId) {
         if (!this.member.getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+            throw new BusinessException(ErrorCode.ORDER_ACCESS_DENIED);
         }
     }
 
