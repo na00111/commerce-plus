@@ -28,10 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class OrderFacade {
 
     private final CartService cartService;
@@ -41,7 +42,9 @@ public class OrderFacade {
     private final ProductService productService;
     private final CartItemService cartItemService;
 
+    @Transactional(readOnly = true)
     public GetCheckoutResponse getCheckoutOne(Long memberId, List<Long> cartItemIds) {
+
         Member member = memberService.findMemberById(memberId);
         Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
         List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, cartItemIds);
@@ -56,8 +59,8 @@ public class OrderFacade {
         return GetCheckoutResponse.of(items, totalPrice);
     }
 
-    @Transactional
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
+
         Member member = memberService.findMemberById(memberId);
         Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
         List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, request.cartItemIds());
@@ -80,36 +83,31 @@ public class OrderFacade {
     }
 
     // 내 주문 목록 조회
-    public PageResponse<GetOrderResponse> getOrdersAll(Long memberId, Pageable pageable) {
-        Page<GetOrderResponse> orders = orderService.findOrdersByMemberId(memberId, pageable)
+    @Transactional(readOnly = true)
+    public Page<GetOrderResponse> getOrdersAll(Long memberId, Pageable pageable) {
+       return orderService.findOrdersByMemberId(memberId, pageable)
                 .map(order -> {
                     // PaymentService에서 주문 ID로 Payment 객체 조회하기
-                    Payment payment = paymentService.findPaymentByOrderId(order.getId())
-                            .orElse(null);
-                    return GetOrderResponse.from(order, payment.getId());
+                  Optional<Payment> payment = paymentService.findPaymentByOrderId(order.getId());
+                  Long paymentId = payment.map(Payment::getId).orElse(null);
+                    return GetOrderResponse.from(order,paymentId);
                 });
-        return PageResponse.of(orders);
     }
 
     // 주문 상세 조회
+    @Transactional(readOnly = true)
     public GetOrderResponse getOrderOne(Long memberId, Long orderId) {
         Order order = orderService.findOrderById(orderId);
-        validateOrderOwner(order, memberId);
-        Long paymentId = paymentService.findPaymentIdByOrderId(orderId)
+        order.validateOwner(memberId);
+        Payment payment = paymentService.findPaymentByOrderId(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
-        return GetOrderResponse.from(order, paymentId);
+        return GetOrderResponse.from(order, payment.getId());
     }
 
-
-
     // 주문 취소
-    @Transactional
     public CancelOrderResponse cancelOrder(Long memberId, Long orderId) {
-
         Order order = orderService.findOrderById(orderId);
-
-        validateOrderOwner(order, memberId);
-
+        order.validateOwner(memberId);
         Payment payment = paymentService.findPaymentByOrderId(orderId)
                 .orElseThrow(() ->
                         new BusinessException(ErrorCode.PAYMENT_NOT_FOUND)
@@ -121,21 +119,10 @@ public class OrderFacade {
         }
 
         payment.cancel();
-
         order.cancel();
-
         return new CancelOrderResponse(
                 order,
                 payment.getStatus()
         );
     }
-
-
-    // 주문이 현재 로그인한 회원의 것이지 확인
-    private void validateOrderOwner(Order order, Long memberId) {
-        if (!order.getMemberId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
-        }
-    }
-
 }
