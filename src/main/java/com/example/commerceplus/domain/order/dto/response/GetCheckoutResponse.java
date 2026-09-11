@@ -6,7 +6,7 @@ import java.util.List;
 
 public record GetCheckoutResponse(List<CheckoutItem> items, int totalPrice) {
 
-    public static GetCheckoutResponse of(List<CheckoutItem> items, int totalPrice) {
+    public static GetCheckoutResponse from(List<CheckoutItem> items, int totalPrice) {
         return new GetCheckoutResponse(items, totalPrice);
     }
 
