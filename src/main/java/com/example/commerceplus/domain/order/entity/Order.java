@@ -98,4 +98,22 @@ public class Order extends BaseTimeEntity {
         }
     }
 
+
+
+    // 결제 부분 추가
+    public void validatePaymentAmount(int requestAmount) {
+        if (this.totalPrice != requestAmount) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+    }
+
+    public void completePayment() {
+        if (!this.status.canTransitTo(OrderStatus.COMPLETED)) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        this.status = OrderStatus.COMPLETED;
+    }
+
 }
+
