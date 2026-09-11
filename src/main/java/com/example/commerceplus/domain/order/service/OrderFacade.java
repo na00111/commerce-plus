@@ -1,5 +1,6 @@
 package com.example.commerceplus.domain.order.service;
 
+import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.cart.entity.Cart;
@@ -9,8 +10,10 @@ import com.example.commerceplus.domain.cart.service.CartService;
 import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.member.sevice.MemberService;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
+import com.example.commerceplus.domain.order.dto.response.CancelOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.CreateOrderResponse;
 import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
+import com.example.commerceplus.domain.order.dto.response.GetOrderResponse;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.payment.entity.Payment;
@@ -18,6 +21,8 @@ import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,4 +78,64 @@ public class OrderFacade {
         // 결제 성공 시점까지 장바구니는 유지한다.
         return CreateOrderResponse.from(order, payment);
     }
+
+    // 내 주문 목록 조회
+    public PageResponse<GetOrderResponse> getOrdersAll(Long memberId, Pageable pageable) {
+        Page<GetOrderResponse> orders = orderService.findOrdersByMemberId(memberId, pageable)
+                .map(order -> {
+                    // PaymentService에서 주문 ID로 Payment 객체 조회하기
+                    Payment payment = paymentService.findPaymentByOrderId(order.getId())
+                            .orElse(null);
+                    return GetOrderResponse.from(order, payment.getId());
+                });
+        return PageResponse.of(orders);
+    }
+
+    // 주문 상세 조회
+    public GetOrderResponse getOrderOne(Long memberId, Long orderId) {
+        Order order = orderService.findOrderById(orderId);
+        validateOrderOwner(order, memberId);
+        Long paymentId = paymentService.findPaymentIdByOrderId(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+        return GetOrderResponse.from(order, paymentId);
+    }
+
+
+
+    // 주문 취소
+    @Transactional
+    public CancelOrderResponse cancelOrder(Long memberId, Long orderId) {
+
+        Order order = orderService.findOrderById(orderId);
+
+        validateOrderOwner(order, memberId);
+
+        Payment payment = paymentService.findPaymentByOrderId(orderId)
+                .orElseThrow(() ->
+                        new BusinessException(ErrorCode.PAYMENT_NOT_FOUND)
+                );
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Product product = orderItem.getProduct();
+            product.restoreStock(orderItem.getQuantity());
+        }
+
+        payment.cancel();
+
+        order.cancel();
+
+        return new CancelOrderResponse(
+                order,
+                payment.getStatus()
+        );
+    }
+
+
+    // 주문이 현재 로그인한 회원의 것이지 확인
+    private void validateOrderOwner(Order order, Long memberId) {
+        if (!order.getMemberId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+    }
+
 }

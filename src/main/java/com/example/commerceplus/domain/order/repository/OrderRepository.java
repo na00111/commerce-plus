@@ -11,7 +11,6 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-
     // 목록 조회 (페이징 O, orderItems는 LAZY)
     // ORDER BY는 JPQL에서 처리
     // Pageable은 순수하게 페이징만 담당
@@ -21,8 +20,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Pageable pageable
     );
 
-
     // 상세 조회 (fetch join으로 orderItems 함께 로드)
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId")
     Optional<Order> findByIdWithOrderItems(@Param("orderId") Long orderId);
+
+    // 주문 취소
+    Optional<Order> findByIdAndMemberId(
+            Long orderId,
+            Long memberId
+    );
 }
