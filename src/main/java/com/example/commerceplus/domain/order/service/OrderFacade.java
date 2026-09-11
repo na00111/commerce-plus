@@ -86,9 +86,9 @@ public class OrderFacade {
                     // PaymentService에서 주문 ID로 Payment 객체 조회하기
                     Payment payment = paymentService.findPaymentByOrderId(order.getId())
                             .orElse(null);
-                    return GetOrderResponse.from(order, payment);
+                    return GetOrderResponse.from(order, payment.getId());
                 });
-        return PageResponse.from(orders);
+        return PageResponse.of(orders);
     }
 
     // 주문 상세 조회
