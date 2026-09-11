@@ -41,7 +41,7 @@ public class Order extends BaseTimeEntity {
 
 
     // 주문 객체 초기화 하면서 주문과 상품 항목들 연결
-    public Order(Member member, int totalPrice, List<OrderItem> orderItems, String orderNumber) {
+    private Order(Member member, int totalPrice, List<OrderItem> orderItems, String orderNumber) {
         this.member = member;
         this.totalPrice = totalPrice;
         this.status = OrderStatus.PAYMENT_PENDING;
@@ -91,4 +91,11 @@ public class Order extends BaseTimeEntity {
 
         this.status = OrderStatus.CANCELED;
     }
+
+    public void validateOwner(Long memberId) {
+        if (!this.member.getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+    }
+
 }
