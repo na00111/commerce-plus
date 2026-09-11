@@ -16,8 +16,9 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
 
-    public static Payment createPayment(Order order, int totalPrice) {
-        return null;
+    public Payment createPayment(Order order) {
+        Payment payment = Payment.create(order);
+        return paymentRepository.save(payment);
     }
 
     public Payment findByOrderIdWithOrder(Long orderId) {
@@ -25,7 +26,7 @@ public class PaymentService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
-    public Payment findPaymentByOrderId(Long orderId) {
-        return findByOrderIdWithOrder(orderId);
+    public Optional<Payment> findPaymentByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId);
     }
 }
