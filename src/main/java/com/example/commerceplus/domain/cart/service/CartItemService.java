@@ -75,7 +75,7 @@ public class CartItemService {
         cartItemRepository.deleteAllByMemberId(memberId);
     }
 
-    public List<CartItem> findAndValidateCartItems(Long memberId, List<Long> cartItemIds) {
-        return null;
+    public List<CartItem> findAndValidateCartItems(Cart cart, List<Long> cartItemIds) {
+        return cartItemRepository.findByCartAndIds(cart, cartItemIds);
     }
 }
