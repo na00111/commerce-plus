@@ -33,6 +33,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     );
     //동일 주문의 상태 변경을 한 번에 하나씩 진행
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT o from Order o where o.id = :orderId")
+    @Query("SELECT o FROM Order o WHERE o.id = :orderId")
     Optional<Order> findByIdWithLock(@Param("orderId") Long orderId);
 }
