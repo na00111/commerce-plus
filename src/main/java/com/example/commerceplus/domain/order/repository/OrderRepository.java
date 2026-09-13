@@ -1,9 +1,11 @@
 package com.example.commerceplus.domain.order.repository;
 
 import com.example.commerceplus.domain.order.entity.Order;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,4 +31,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Long orderId,
             Long memberId
     );
+    //동일 주문의 상태 변경을 한 번에 하나씩 진행
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o from Order o where o.id = :orderId")
+    Optional<Order> findByIdWithLock(@Param("orderId") Long orderId);
 }
