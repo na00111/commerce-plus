@@ -6,6 +6,8 @@ package com.example.commerceplus.domain.payment.entity;
 // COMPLETED       → CANCELED
 // FAILED          → (종료)
 // CANCELED        → (종료)
+
+//서버가 검증 ,처리를 마친 뒤 저장한 결제 결과
 public enum PaymentStatus {
 
     PAYMENT_PENDING {
