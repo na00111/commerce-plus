@@ -95,7 +95,7 @@ public class ProductService {
         for (Map.Entry<Long, Integer> entry : quantitiesByProduct.entrySet()) {
             Long productId = entry.getKey();
             Integer quantity = entry.getValue();
-//상품마다 한 번 조회하고 한 번 복구
+            //상품마다 한 번 조회하고 한 번 복구
             Product product = findProductForStockChange(productId);
             product.restoreStock(quantity);
         }
