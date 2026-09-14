@@ -2,7 +2,6 @@ package com.example.commerceplus.domain.product.repository;
 
 import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionRequest;
 import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionResponse;
-import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.entity.ProductCategory;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -12,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 import static com.example.commerceplus.domain.product.entity.QProduct.product;
 
+@Repository
 @RequiredArgsConstructor
 public class ProductRepositoryImpl implements ProductRepositoryCustom {
 

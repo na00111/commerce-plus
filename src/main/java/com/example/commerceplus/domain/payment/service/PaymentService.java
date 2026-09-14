@@ -45,9 +45,5 @@ public class PaymentService {
     public Page<Payment> findPaymentsByMemberId(Long memberId, Pageable pageable) {
        return paymentRepository.findPaymentsByMemberId(memberId, pageable);
     }
-  
-    public Optional<Payment> findPaymentByOrderId(Long orderId) {
-        return paymentRepository.findByOrderId(orderId);
-    }
 
 }

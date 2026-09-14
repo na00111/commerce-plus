@@ -63,7 +63,7 @@ public class ConcurrencyTest {
         long beforeOrderCount = orderRepository.count();
 
         Product product =
-                productRepository.saveAndFlush(new Product("test1", 100, initialStock, "test1", ProductCategory.ETC));
+                productRepository.saveAndFlush(Product.create("test1", 100, initialStock, "test1", ProductCategory.ETC));
         List<Long> membersIds = new ArrayList<>();
         List<CreateOrderRequest> request = new ArrayList<>();
 

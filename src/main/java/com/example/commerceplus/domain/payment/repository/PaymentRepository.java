@@ -1,16 +1,17 @@
 package com.example.commerceplus.domain.payment.repository;
 
 import com.example.commerceplus.domain.payment.entity.Payment;
-import jakarta.persistence.Entity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // 모의 결제 처리 시 주문 ID로 결제 조회

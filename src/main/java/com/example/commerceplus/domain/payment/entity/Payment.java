@@ -61,16 +61,15 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.PAYMENT_PENDING;
     }
 
+    // 주문 생성 시 결제 대기 데이터를 생성
+    public static Payment create(Order order) {
+        return new Payment(order);
+    }
+
     public void validatePendingPayment() {
         if (this.status != PaymentStatus.PAYMENT_PENDING) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED_PAYMENT);
         }
-    }
-
-
-    // 주문 생성 시 결제 대기 데이터를 생성
-    public static Payment create(Order order) {
-        return new Payment(order);
     }
 
     // 요청 금액과 서버에 저장된 결제 금액이 일치하는지 검증

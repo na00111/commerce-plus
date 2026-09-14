@@ -34,11 +34,7 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private ProductCategory category;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false, length = 20)
-//    private ProductStatus status;
-
-    public Product(String name, int price, int stock, String comment, ProductCategory category) {
+    private Product(String name, int price, int stock, String comment, ProductCategory category) {
         isPriceLessThanZero(price);
         isStockLessThanOne(stock);
 
@@ -47,6 +43,10 @@ public class Product extends BaseTimeEntity {
         this.stock = stock;
         this.comment = comment;
         this.category = category;
+    }
+
+    public static Product create(String name, int price, int stock, String comment, ProductCategory category) {
+        return new Product(name, price, stock, comment, category);
     }
 
     public void decreaseStock(int stock) {

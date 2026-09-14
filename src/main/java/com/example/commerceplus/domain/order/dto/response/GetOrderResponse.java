@@ -10,8 +10,8 @@ public record GetOrderResponse(
         String orderNumber,
         Long paymentId,
         String paymentStatus,
-        int totalPrice,
         String status,
+        int totalPrice,
         String orderName,
         LocalDateTime createdAt,
         List<GetOrderItemResponse> orderItems
@@ -32,8 +32,8 @@ public record GetOrderResponse(
                 order.getOrderNumber(),
                 paymentId,
                 paymentStatus,
-                order.getTotalPrice(),
                 order.getStatus().name(),
+                order.getTotalPrice(),
                 order.getOrderName(),
                 order.getCreatedAt(),
                 orderItems
