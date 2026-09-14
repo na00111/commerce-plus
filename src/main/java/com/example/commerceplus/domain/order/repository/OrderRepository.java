@@ -1,12 +1,16 @@
 package com.example.commerceplus.domain.order.repository;
 
 import com.example.commerceplus.domain.order.entity.Order;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, OrderRepositoryCustom {
@@ -29,4 +33,13 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
             Long orderId,
             Long memberId
     );
+  
+    //동일 주문의 상태 변경을 한 번에 하나씩 진행
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM Order o WHERE o.id = :orderId")
+    Optional<Order> findByIdWithLock(@Param("orderId") Long orderId);
+
+    // 주문생성 후 30분이 지난 주문을 찾음
+    @Query("SELECT o FROM Order o WHERE o.createdAt < :thresholdTime AND o.status = PAYMENT_PENDING")
+    List<Order> findExpireOrders(@Param("thresholdTime") LocalDateTime thresholdTime);
 }

@@ -21,11 +21,16 @@ public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
 
-    public int addItem(Cart cart,
-                        Product product,
-                        int quantity) {
+    public int addItem(Cart cart, Product product, int quantity) {
         // Cart와 Product조합의 CartItem 이 있는지 확인
         Optional<CartItem> foundCartItem = cartItemRepository.findByCartAndProduct(cart, product);
+        // 현재 장바구니 수량과 담으려는 수량을 더함
+        int expectedQuantity = foundCartItem.map(CartItem::getQuantity).orElse(0) + quantity;
+
+        if (!product.isEnoughStock(expectedQuantity)) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+
         // 신규 생성인 경우
         if (foundCartItem.isEmpty()) {
             CartItem newCartItem = CartItem.createCartItem(cart, product, quantity);
@@ -76,6 +81,16 @@ public class CartItemService {
     }
 
     public List<CartItem> findAndValidateCartItems(Cart cart, List<Long> cartItemIds) {
-        return cartItemRepository.findByCartAndIds(cart, cartItemIds);
+        List<CartItem> findCartItems = cartItemRepository.findByCartAndIds(cart, cartItemIds);
+
+        if (findCartItems.isEmpty()) {
+            throw new BusinessException(ErrorCode.CART_EMPTY);
+        }
+
+        if (cartItemIds.size() != findCartItems.size()) {
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        return findCartItems;
     }
 }

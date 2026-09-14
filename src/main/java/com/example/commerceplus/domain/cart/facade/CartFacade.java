@@ -27,23 +27,15 @@ public class CartFacade {
 
 
     public int addItem(Long memberId, Long productId, int quantity) {
-        //수량 확인
-        if (quantity <= 0) {
-            throw new BusinessException(ErrorCode.INVALID_QUANTITY);
-        }
+
         // 로그인한 회원 조회
         Member member = memberService.findMemberById(memberId);
-        //상품 있는지
+        //상품 있는
         Product product = productService.findProductById(productId);
-        // 회원의 장바구니 조회
-        // 장바구니가 없다면 새로 생성
+        // 회원의 장바구니 조회 후 없다면 새로 생성
         Cart cart = cartService.findOrCreateCart(member);
-
-        // 장바구니에 담기 상품의 재고보다 장바구니에 담은 수량이 더 많은지 검증하는 로직
-        int currentCartItemQuantity = cartItemService.getExistingQuantity(cart, product);
-        int totalQuantity = currentCartItemQuantity + quantity;
-
-       return cartItemService.addItem(cart, product, quantity);
+        // 재고 검증 및 저장
+        return cartItemService.addItem(cart, product, quantity);
     }
 
     public CartResponse getCart(Long memberId) {
