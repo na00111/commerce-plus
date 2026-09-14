@@ -6,6 +6,8 @@ import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
@@ -36,5 +38,7 @@ public class PaymentService {
     public Optional<Payment> findPaymentByOrderId(Long orderId) {
         return paymentRepository.findByOrderId(orderId);
     }
-
+public Page<Payment> findPaymentsByMemberId(Long memberId, Pageable pageable) {
+       return paymentRepository.findPaymentsByMemberId(memberId, pageable);
+}
 }
