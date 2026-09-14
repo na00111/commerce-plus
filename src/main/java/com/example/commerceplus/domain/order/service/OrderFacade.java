@@ -59,10 +59,12 @@ public class OrderFacade {
         return GetCheckoutResponse.from(items, totalPrice);
     }
 
+    //생성할 주문 항목을 담는 빈 목록
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
 
         Member member = memberService.findMemberById(memberId);
         Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+      
         List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, request.cartItemIds());
         // 데드락 방지를 위해 ProductId로 정렬
         List<CartItem> sortedCartItems = cartItems.stream()
@@ -70,19 +72,35 @@ public class OrderFacade {
                 .toList();
         List<OrderItem> orderItems = new ArrayList<>();
 
-        for (CartItem cartItem : cartItems) {
+        //선택한 장바구니 항목을 주문 항목으로 변환
+        for (CartItem cartItem : sortedCartItems) {
+            // 이번 수정에서는 네가 사용하던 조회 메서드를 유지합니다.
             Product product = productService.findProductById(cartItem.getProductId());
+
+            // 주문 수량만큼 재고를 선차감
             product.decreaseStock(cartItem.getQuantity());
-            orderItems.add(new OrderItem(product, product.getPrice(), cartItem.getQuantity()));
+
+            // 기존 3개 인자 생성자를 사용 상품, 주문 당시 가격, 주문 수량만 전달
+            OrderItem orderItem = new OrderItem(product, product.getPrice(), cartItem.getQuantity() );
+
+            // 생성한 주문 항목을 목록에 추가
+            orderItems.add(orderItem);
         }
 
+        //각 항목의 소계(가격 × 수량)를 합산
         int totalPrice = orderItems.stream()
                 .mapToInt(OrderItem::getSubtotal)
                 .sum();
         Order order = orderService.createOrder(member, orderItems, totalPrice);
         Payment payment = paymentService.createPayment(order);
 
-        // 결제 성공 시점까지 장바구니는 유지한다.
+        //주문과 주문 항목을 저장
+        Order order = orderService.createOrder(member, orderItems, totalPrice);
+
+        // 해당 주문의 대기 결제를 생성
+        Payment payment = paymentService.createPayment(order);
+
+        //주문 생성 결과를 반환 장바구니는 결제 성공까지 유지
         return CreateOrderResponse.from(order, payment);
     }
 

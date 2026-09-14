@@ -8,7 +8,9 @@ import jakarta.validation.constraints.Pattern;
 public record PaymentRequest(
         @NotNull @Min(1)
         Long orderId,
-       MockPaymentResult result,
-        @NotNull @Min(1) Integer amount
+        @NotNull
+        MockPaymentResult result,
+        @NotNull @Min(1) 
+        Integer amount
 ) {
 }

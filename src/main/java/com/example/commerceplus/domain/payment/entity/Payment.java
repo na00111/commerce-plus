@@ -5,18 +5,7 @@ import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.order.entity.Order;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +16,8 @@ import java.time.LocalDateTime;
 @Table(name = "payments")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AttributeOverride(name = "createdAt" , column =@Column(nullable = false, updatable = false))
+//결제 금액 검증 , 상태 변경
 public class Payment extends BaseTimeEntity {
 
     @Id
@@ -69,6 +60,13 @@ public class Payment extends BaseTimeEntity {
         // 최초 결제 상태는 항상 결제 대기
         this.status = PaymentStatus.PAYMENT_PENDING;
     }
+
+    public void validatePendingPayment() {
+        if (this.status != PaymentStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.ALREADY_PROCESSED_PAYMENT);
+        }
+    }
+
 
     // 주문 생성 시 결제 대기 데이터를 생성
     public static Payment create(Order order) {

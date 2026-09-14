@@ -11,19 +11,15 @@ public record PaymentResponse(
     Long paymentId,
     Long orderId,
     int amount,
-
-    @JsonProperty("pay_status")
     String payStatus,
-    @JsonProperty("order_status")
     String orderStatus,
-    @JsonProperty("paid_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime paidAt
 ) {
-public static PaymentResponse of(Payment payment , Order order) {
+public static PaymentResponse from(Payment payment) {
+    Order order = payment.getOrder();
     return new PaymentResponse (
             payment.getId(),
-            payment.getOrderId(),
+            order.getId(),
             payment.getAmount(),
             payment.getStatus().name(),
             order.getStatus().name(),
