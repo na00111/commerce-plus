@@ -93,4 +93,15 @@ public class CartItemService {
 
         return findCartItems;
     }
+
+
+    public void deleteOrderedProducts(Long memberId, List<Long> productIds) {
+        // 삭제 대상이 없으면 쿼리를 실행하지 않습니다.
+        if (productIds.isEmpty()) {
+            return;
+        }
+
+        // 회원 ID와 상품 ID 목록을 Repository에 전달합니다.
+        cartItemRepository.deleteByMemberIdAndProductIds(memberId, productIds);
+    }
 }
