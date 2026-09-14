@@ -40,7 +40,6 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String orderNumber;
 
-
     // 주문 객체 초기화 하면서 주문과 상품 항목들 연결
     private Order(Member member, int totalPrice, List<OrderItem> orderItems, String orderNumber) {
         this.member = member;
@@ -59,12 +58,10 @@ public class Order extends BaseTimeEntity {
         return new Order(member, totalPrice, orderItems, orderNumber);
     }
 
-
     // 주문한 회원의 ID만 빠르게 조회
     public Long getMemberId() {
         return member.getId();
     }
-
 
     // 주문에 상품을 추가하면서 양방향 관계 맺기
     public void addOrderItem(OrderItem orderItem) {

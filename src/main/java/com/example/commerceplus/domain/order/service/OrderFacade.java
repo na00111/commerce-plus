@@ -9,10 +9,7 @@ import com.example.commerceplus.domain.cart.service.CartService;
 import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.member.sevice.MemberService;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
-import com.example.commerceplus.domain.order.dto.response.CancelOrderResponse;
-import com.example.commerceplus.domain.order.dto.response.CreateOrderResponse;
-import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
-import com.example.commerceplus.domain.order.dto.response.GetOrderResponse;
+import com.example.commerceplus.domain.order.dto.response.*;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.payment.entity.Payment;
@@ -81,7 +78,7 @@ public class OrderFacade {
             product.decreaseStock(cartItem.getQuantity());
 
             // 기존 3개 인자 생성자를 사용 상품, 주문 당시 가격, 주문 수량만 전달
-            OrderItem orderItem = new OrderItem(product, product.getPrice(), cartItem.getQuantity() );
+            OrderItem orderItem = OrderItem.create(product, product.getPrice(), cartItem.getQuantity());
 
             // 생성한 주문 항목을 목록에 추가
             orderItems.add(orderItem);
@@ -91,8 +88,6 @@ public class OrderFacade {
         int totalPrice = orderItems.stream()
                 .mapToInt(OrderItem::getSubtotal)
                 .sum();
-        Order order = orderService.createOrder(member, orderItems, totalPrice);
-        Payment payment = paymentService.createPayment(order);
 
         //주문과 주문 항목을 저장
         Order order = orderService.createOrder(member, orderItems, totalPrice);
@@ -106,13 +101,13 @@ public class OrderFacade {
 
     // 내 주문 목록 조회
     @Transactional(readOnly = true)
-    public Page<GetOrderResponse> getOrdersAll(Long memberId, Pageable pageable) {
+    public Page<GetAllOrderResponse> getOrdersAll(Long memberId, Pageable pageable) {
        return orderService.findOrdersByMemberId(memberId, pageable)
                 .map(order -> {
                     // PaymentService에서 주문 ID로 Payment 객체 조회하기
                   Optional<Payment> payment = paymentService.findPaymentByOrderId(order.getId());
                   Long paymentId = payment.map(Payment::getId).orElse(null);
-                    return GetOrderResponse.from(order,paymentId);
+                    return GetAllOrderResponse.from(order,paymentId);
                 });
     }
 
@@ -123,7 +118,7 @@ public class OrderFacade {
         order.validateOwner(memberId);
         Payment payment = paymentService.findPaymentByOrderId(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
-        return GetOrderResponse.from(order, payment.getId());
+        return GetOrderResponse.from(order, payment.getId(), payment.getStatus().name());
     }
 
     // 주문 취소

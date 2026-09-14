@@ -6,10 +6,7 @@ import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.common.jwt.JwtUser;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
 import com.example.commerceplus.domain.order.dto.request.SearchOrderConditionRequest;
-import com.example.commerceplus.domain.order.dto.response.CancelOrderResponse;
-import com.example.commerceplus.domain.order.dto.response.CreateOrderResponse;
-import com.example.commerceplus.domain.order.dto.response.GetCheckoutResponse;
-import com.example.commerceplus.domain.order.dto.response.GetOrderResponse;
+import com.example.commerceplus.domain.order.dto.response.*;
 import com.example.commerceplus.domain.order.service.OrderFacade;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +48,7 @@ public class OrderController {
 
     // 내 주문 목록 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<GetOrderResponse>>> getOrdersAll(
+    public ResponseEntity<ApiResponse<PageResponse<GetAllOrderResponse>>> getOrdersAll(
             @Auth JwtUser jwtUser,
             @Valid SearchOrderConditionRequest condition
             ) {

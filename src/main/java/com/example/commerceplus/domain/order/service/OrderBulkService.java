@@ -40,12 +40,7 @@ public class OrderBulkService {
             int quantity = 1;
             int totalPrice = product.getPrice() * quantity;
 
-            OrderItem orderItem =
-                    new OrderItem(
-                            product,
-                            product.getPrice(),
-                            quantity
-                    );
+            OrderItem orderItem = OrderItem.create(product, product.getPrice(), quantity);
 
             Order order = Order.create(
                     member,

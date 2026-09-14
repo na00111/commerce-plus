@@ -1,6 +1,5 @@
 package com.example.commerceplus.domain.cart.entity;
 
-
 import com.example.commerceplus.common.entity.BaseTimeEntity;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
@@ -44,8 +43,6 @@ public class CartItem extends BaseTimeEntity {
     @Column(nullable = false)
     private int quantity;
 
-    // 필요한 값만 명시해 CartItem을 만들 수 있도록 빌더 생성 지점을 이 생성자로 제한
-    @Builder
     private CartItem(Cart cart, Product product, int quantity) {
         // 어느 장바구니에 들어가는 항목인지 저장
         this.cart = cart;
@@ -76,11 +73,7 @@ public class CartItem extends BaseTimeEntity {
         }
 
         // 3. 빌더를 통해 최종 객체 생성 후 반환
-        return CartItem.builder()
-                .cart(cart)
-                .product(product)
-                .quantity(quantity)
-                .build();
+        return new CartItem(cart, product, quantity);
     }
 
     public Long getProductId() {

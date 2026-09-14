@@ -51,7 +51,7 @@ public class ProductBulkService {
             ProductCategory category = categories[random.nextInt(categories.length)];
 
             // 객체 생성 후 리스트에 add
-            products.add(new Product(name, price, stock, comment, category));
+            products.add(Product.create(name, price, stock, comment, category));
         }
 
         // 3. 쪼개서 저장하는 배치 메서드 호출

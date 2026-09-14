@@ -101,8 +101,8 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
                                     ? paymentEntity.getStatus().name()
                                     : null,
 
-                            orderEntity.getTotalPrice(),
                             orderEntity.getStatus().name(),
+                            orderEntity.getTotalPrice(),
                             orderEntity.getOrderName(),
                             orderEntity.getCreatedAt(),
                             orderItems
