@@ -39,6 +39,11 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     }
 
+    @Transactional
+    public Order findOderIdWithLock (Long orderId) {
+        return  orderRepository.findByIdWithLock(orderId)
+                .orElseThrow( () -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+      
     public List<Order> findPendingOrdersOlderThan(LocalDateTime thresholdTime) {
        return orderRepository.findExpireOrders(thresholdTime);
     }

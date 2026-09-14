@@ -20,6 +20,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query("SELECT p FROM Payment p JOIN FETCH p.order WHERE p.order.id = :orderId")
     Optional<Payment> findByOrderIdWithOrder(@Param("orderId") Long orderId);
 
+    Optional<Payment> findByOrderIdAndMemberId(@Param("orderId") Long orderId,@Param("memberId") Long memberId);
+
+    @Query("SELECT p FROM Payment p join FETCH p.order WHERE p.id = :paymentId")
+    Optional<Payment> findByPaymentId(@Param("paymentId") Long paymentId);
+
+
+
+
     // 결제 단건 조회
 //    // 응답에서 주문 상태를 사용하므로 Order를 함께 조회
 //    @Override
