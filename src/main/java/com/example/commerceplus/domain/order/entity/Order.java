@@ -1,7 +1,10 @@
 package com.example.commerceplus.domain.order.entity;
 
 import com.example.commerceplus.common.entity.BaseTimeEntity;
+import com.example.commerceplus.common.exception.BusinessException;
+import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.member.entity.Member;
+import com.example.commerceplus.domain.payment.entity.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,7 +42,7 @@ public class Order extends BaseTimeEntity {
 
 
     // 주문 객체 초기화 하면서 주문과 상품 항목들 연결
-    public Order(Member member, int totalPrice, List<OrderItem> orderItems, String orderNumber) {
+    private Order(Member member, int totalPrice, List<OrderItem> orderItems, String orderNumber) {
         this.member = member;
         this.totalPrice = totalPrice;
         this.status = OrderStatus.PAYMENT_PENDING;
@@ -80,4 +83,52 @@ public class Order extends BaseTimeEntity {
         }
         return firstName + " 외 " + (orderItems.size() - 1) + "건";
     }
+
+    // 취소 가능한 상태 검증(결제 후 취소)
+    public void cancel() {
+        if (this.status != OrderStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        this.status = OrderStatus.CANCELED;
+    }
+
+    // 취소 가능한 상태 검증(결제전 시간만료로 인한 취소)
+    public void cancelByTimeout() {
+        if (this.status != OrderStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        this.status = OrderStatus.CANCELED;
+    }
+
+    public void validateOwner(Long memberId) {
+        if (!this.member.getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.ORDER_ACCESS_DENIED);
+        }
+    }
+
+    // 결제 부분 추가
+    public void validatePaymentAmount(int requestAmount) {
+        if (this.totalPrice != requestAmount) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+    }
+
+    public void completePayment() {
+        if (!this.status.canTransitTo(OrderStatus.COMPLETED)) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        this.status = OrderStatus.COMPLETED;
+    }
+
+    public void validatePaymentPending() {
+        //주문이 결제를 진행할 수 있는 상황인지
+        if (this.status != OrderStatus.PAYMENT_PENDING) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+    }
 }
+

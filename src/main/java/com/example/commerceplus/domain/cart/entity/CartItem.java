@@ -104,9 +104,15 @@ public class CartItem extends BaseTimeEntity {
 
     // 수량 수정 요청처럼 기존 수량을 새 값으로 교체할 때 사용하는 도메인 메서드
     public void changeQuantity(int quantity) {
+        //최종 수량 검증
         if (quantity < 1) {
             throw new BusinessException(ErrorCode.INVALID_QUANTITY);
         }
+        //재고 검증
+        if (!this.product.isEnoughStock(quantity)) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+        //수량 변경
         this.quantity = quantity;
     }
 }

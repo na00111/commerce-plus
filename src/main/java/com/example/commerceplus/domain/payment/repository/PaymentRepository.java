@@ -31,4 +31,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     countQuery = "SELECT COUNT(p) FROM Payment p WHERE p.member.id = :memberId")
     Page<Payment> findPaymentsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
+    @Query("SELECT p FROM Payment p join FETCH p.order WHERE p.id = :paymentId")
+    Optional<Payment> findByPaymentId(@Param("paymentId") Long paymentId);
+
 }

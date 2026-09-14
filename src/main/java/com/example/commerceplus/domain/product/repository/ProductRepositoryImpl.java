@@ -1,8 +1,10 @@
 package com.example.commerceplus.domain.product.repository;
 
-import com.example.commerceplus.domain.product.dto.condition.SearchProductCondition;
+import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionRequest;
+import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionResponse;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.entity.ProductCategory;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,10 +23,17 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Product> findProductsByCondition(Pageable pageable, SearchProductCondition condition) {
+    public Page<SearchProductConditionResponse> findProductsByCondition(Pageable pageable, SearchProductConditionRequest condition) {
 
-        List<Product> products = jpaQueryFactory
-                .selectFrom(product)
+        List<SearchProductConditionResponse> products = jpaQueryFactory
+                .select(Projections.constructor(SearchProductConditionResponse.class,
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.category
+
+                        ))
+                .from(product)
                 .where(
                         minPriceCondition(condition.minPrice()),
                         maxPriceCondition(condition.maxPrice()),

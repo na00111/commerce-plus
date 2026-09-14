@@ -9,6 +9,7 @@ import com.example.commerceplus.domain.member.dto.request.CreateMemberRequest;
 import com.example.commerceplus.domain.member.dto.request.LoginMemberRequest;
 import com.example.commerceplus.domain.member.dto.response.CreateAdminResponse;
 import com.example.commerceplus.domain.member.dto.response.CreateMemberResponse;
+import com.example.commerceplus.domain.member.dto.response.GetAllAdminResponse;
 import com.example.commerceplus.domain.member.dto.response.LoginMemberResponse;
 import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.member.entity.MemberRole;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -82,7 +85,7 @@ public class MemberService {
        Optional<Member> findMember = memberRepository.findByEmail(request.email());
 
        if (findMember.isEmpty()) {
-           throw new BusinessException(ErrorCode.UNAUTHORIZED);
+           throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
        }
 
        Member member = findMember.get();
@@ -90,7 +93,7 @@ public class MemberService {
        boolean matches = passwordEncoder.matches(request.password(), member.getPassword());
 
        if (!matches) {
-           throw new BusinessException(ErrorCode.UNAUTHORIZED);
+           throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
        }
 
         if (member.getStatus() == MemberStatus.INACTIVE) {
@@ -107,6 +110,14 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public List<GetAllAdminResponse> findAllAdmin() {
 
+        List<MemberRole> roleList = Arrays.stream(MemberRole.values())
+                .filter(role -> role != MemberRole.NORMAL) // NORMAL이 아닌 것만 (ex: ADMIN, MANAGER 등)
+                .toList();
 
+        List<Member> members = memberRepository.findByRoles(roleList);
+        return members.stream().map(GetAllAdminResponse::from).toList();
+    }
 }

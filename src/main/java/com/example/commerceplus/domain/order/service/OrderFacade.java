@@ -59,72 +59,29 @@ public class OrderFacade {
         return GetCheckoutResponse.from(items, totalPrice);
     }
 
-//    public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
-//
-//        Member member = memberService.findMemberById(memberId);
-//        Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
-//        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, request.cartItemIds());
-//        List<OrderItem> orderItems = new ArrayList<>();
-//
-//        for (CartItem cartItem : cartItems) {
-//            Product product = productService.findProductById(cartItem.getProductId());
-//            product.decreaseStock(cartItem.getQuantity());
-//            orderItems.add(new OrderItem(product, product.getPrice(), cartItem.getQuantity()));
-//        }
-//
-//        int totalPrice = orderItems.stream()
-//                .mapToInt(OrderItem::getSubtotal)
-//                .sum();
-//        Order order = orderService.createOrder(member, orderItems, totalPrice);
-//        Payment payment = paymentService.createPayment(order);
-//
-//        // 결제 성공 시점까지 장바구니는 유지한다.
-//        return CreateOrderResponse.from(order, payment);
-//    }
+    //생성할 주문 항목을 담는 빈 목록
+    public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
 
-    public CreateOrderResponse createOrder(
-            Long memberId,
-            CreateOrderRequest request
-    ) {
-        //로그인 회원을 조회
         Member member = memberService.findMemberById(memberId);
-
-        //해당 회원의 장바구니를 조회
-        Cart cart = cartService.findCart(member.getId())
-                .orElseThrow(
-                        () -> new BusinessException(ErrorCode.CART_NOT_FOUND)
-                );
-
-        //요청한 장바구니 항목이 해당 장바구니에 있는지 검증
-        List<CartItem> cartItems =
-                cartItemService.findAndValidateCartItems(
-                        cart,
-                        request.cartItemIds()
-                );
-
-        //생성할 주문 항목을 담는 빈 목록
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        //상품 ID 순서로 처리 정렬만으로 DB 잠금이 걸리는 것은 아님
+        Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+      
+        List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, request.cartItemIds());
+        // 데드락 방지를 위해 ProductId로 정렬
         List<CartItem> sortedCartItems = cartItems.stream()
-                .sorted(Comparator.comparing(CartItem::getProductId))
+                .sorted(Comparator.comparing(cartItem -> cartItem.getProduct().getId()))
                 .toList();
+        List<OrderItem> orderItems = new ArrayList<>();
 
         //선택한 장바구니 항목을 주문 항목으로 변환
         for (CartItem cartItem : sortedCartItems) {
             // 이번 수정에서는 네가 사용하던 조회 메서드를 유지합니다.
-            Product product =
-                    productService.findProductById(cartItem.getProductId());
+            Product product = productService.findProductById(cartItem.getProductId());
 
             // 주문 수량만큼 재고를 선차감
             product.decreaseStock(cartItem.getQuantity());
 
             // 기존 3개 인자 생성자를 사용 상품, 주문 당시 가격, 주문 수량만 전달
-            OrderItem orderItem = new OrderItem(
-                    product,
-                    product.getPrice(),
-                    cartItem.getQuantity()
-            );
+            OrderItem orderItem = new OrderItem(product, product.getPrice(), cartItem.getQuantity() );
 
             // 생성한 주문 항목을 목록에 추가
             orderItems.add(orderItem);
@@ -134,10 +91,11 @@ public class OrderFacade {
         int totalPrice = orderItems.stream()
                 .mapToInt(OrderItem::getSubtotal)
                 .sum();
+        Order order = orderService.createOrder(member, orderItems, totalPrice);
+        Payment payment = paymentService.createPayment(order);
 
         //주문과 주문 항목을 저장
-        Order order =
-                orderService.createOrder(member, orderItems, totalPrice);
+        Order order = orderService.createOrder(member, orderItems, totalPrice);
 
         // 해당 주문의 대기 결제를 생성
         Payment payment = paymentService.createPayment(order);
@@ -145,8 +103,6 @@ public class OrderFacade {
         //주문 생성 결과를 반환 장바구니는 결제 성공까지 유지
         return CreateOrderResponse.from(order, payment);
     }
-
-
 
     // 내 주문 목록 조회
     @Transactional(readOnly = true)

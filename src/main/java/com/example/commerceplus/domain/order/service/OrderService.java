@@ -12,13 +12,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -43,5 +43,8 @@ public class OrderService {
     public Order findOderIdWithLock (Long orderId) {
         return  orderRepository.findByIdWithLock(orderId)
                 .orElseThrow( () -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+      
+    public List<Order> findPendingOrdersOlderThan(LocalDateTime thresholdTime) {
+       return orderRepository.findExpireOrders(thresholdTime);
     }
 }

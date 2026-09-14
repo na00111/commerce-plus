@@ -1,6 +1,6 @@
 package com.example.commerceplus.domain.product.dto.response;
 
-import com.example.commerceplus.domain.product.entity.Product;
+import com.example.commerceplus.domain.product.dto.condition.SearchProductConditionResponse;
 
 public record GetAllProductResponse(
         Long id,
@@ -10,13 +10,13 @@ public record GetAllProductResponse(
         String categoryDescription
 )
 {
-    public static GetAllProductResponse from(Product product) {
+    public static GetAllProductResponse from(SearchProductConditionResponse product) {
         return new GetAllProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getCategory().name(),
-                product.getCategory().getDescription()
+                product.id(),
+                product.name(),
+                product.price(),
+                product.category().name(),
+                product.category().getDescription()
         );
     }
 }
