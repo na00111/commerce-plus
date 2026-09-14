@@ -1,6 +1,7 @@
 package com.example.commerceplus.domain.payment.repository;
 
 import com.example.commerceplus.domain.payment.entity.Payment;
+import jakarta.persistence.Entity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -24,4 +25,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT p FROM Payment p join FETCH p.order WHERE p.id = :paymentId")
     Optional<Payment> findByIdWithOrder(@Param("paymentId") Long paymentId);
+
+    @EntityGraph(attributePaths = "order")
+    @Query(value = "SELECT p FROM Payment p WHERE p.member.id = :memberId ORDER BY p.createdAt DESC , p.id DESC ",
+    countQuery = "SELECT COUNT(p) FROM Payment p WHERE p.member.id = :memberId")
+    Page<Payment> findPaymentsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
 }

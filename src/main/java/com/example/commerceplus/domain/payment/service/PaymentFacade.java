@@ -11,6 +11,8 @@ import com.example.commerceplus.domain.payment.dto.response.PaymentResponse;
 import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -123,6 +125,12 @@ public class PaymentFacade {
     // 결제 조회에서도 반드시 소유자를 검사
    payment.getOrder().validateOwner(memberId);
     return PaymentResponse.from(payment);
+}
+
+public Page<PaymentResponse> getPayments(Long memberId, Pageable pageable) {
+        //로그인 회원의 결제 페이지 조회
+    Page<Payment> payments = paymentService.findPaymentsByMemberId(memberId, pageable);
+    return payments.map(PaymentResponse::from);
 
 }
 }
