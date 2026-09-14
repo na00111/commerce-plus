@@ -16,17 +16,20 @@ import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.service.ProductService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Transactional
@@ -38,7 +41,7 @@ public class OrderFacade {
     private final PaymentService paymentService;
     private final ProductService productService;
     private final CartItemService cartItemService;
-
+    private final EntityManager em;
     @Transactional(readOnly = true)
     public GetCheckoutResponse getCheckoutOne(Long memberId, List<Long> cartItemIds) {
 
@@ -72,7 +75,23 @@ public class OrderFacade {
         //선택한 장바구니 항목을 주문 항목으로 변환
         for (CartItem cartItem : sortedCartItems) {
             // 이번 수정에서는 네가 사용하던 조회 메서드를 유지합니다.
-            Product product = productService.findProductById(cartItem.getProductId());
+            Product product = productService.findProductByIdWithLock(cartItem.getProductId());
+
+            try {
+                log.info("락 획득 후 대기 시작 - thread={}, productId={}",
+                        Thread.currentThread().getName(),
+                        product.getId());
+
+                Thread.sleep(1_000L);
+
+                log.info("대기 종료 - thread={}, productId={}",
+                        Thread.currentThread().getName(),
+                        product.getId());
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("재고 처리 중 인터럽트가 발생했습니다.", e);
+            }
 
             // 주문 수량만큼 재고를 선차감
             product.decreaseStock(cartItem.getQuantity());

@@ -11,6 +11,7 @@ import com.example.commerceplus.domain.product.repository.ProductRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.TreeMap;
-
+@Log4j2
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -76,7 +77,11 @@ public class ProductService {
 
     // 동시성을 막기 위한 비관적 락을 사용한 버가
     public Product findProductByIdWithLock(Long productId) {
-        return productRepository.findByIdWithLock(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findByIdWithLock(productId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        log.info("Product Service thread={},  productId ={}, productStock ={}",
+                Thread.currentThread().getName(), product.getId(),product.getStock());
+        entityManager.refresh(product, LockModeType.PESSIMISTIC_WRITE);
+        return product;
     }
 
     public Product findProductForStockChange(Long productId) {

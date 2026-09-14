@@ -21,12 +21,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -56,62 +59,104 @@ public class ConcurrencyTest {
     private EntityManager em; //
 
     @Test
-    void 재고_불변식을_검증한다() throws InterruptedException {
-        // given ( 같은 상품을 다른 Member, Cart, CartItem으로 주문 )
+    void 재고_불변식을_검증한다() throws Exception {
+        log.info("시작");
         int threadCount = 100;
         int initialStock = 10;
+
         long beforeOrderCount = orderRepository.count();
 
-        Product product =
-                productRepository.saveAndFlush(Product.create("test1", 100, initialStock, "test1", ProductCategory.ETC));
-        List<Long> membersIds = new ArrayList<>();
-        List<CreateOrderRequest> request = new ArrayList<>();
+        Product product = productRepository.saveAndFlush(
+                Product.create("test1", 100, initialStock, "test1", ProductCategory.ETC)
+        );
 
-        for (int i=0; i<threadCount; i++) {
-            Member member =
-                    memberRepository.saveAndFlush(Member.createNormalMember("test" + i, "1234", "test" + i, "011-1112-111" + i));
+        List<Long> memberIds = new ArrayList<>();
+        List<CreateOrderRequest> requests = new ArrayList<>();
+
+        for (int i = 0; i < threadCount; i++) {
+            Member member = memberRepository.saveAndFlush(
+                    Member.createNormalMember(
+                            "test" + i,
+                            "1234",
+                            "test" + i,
+                            "011-1112-111" + i
+                    )
+            );
+
             Cart cart = cartRepository.saveAndFlush(Cart.create(member));
-            CartItem cartItem = cartItemRepository.saveAndFlush(CartItem.createCartItem(cart,product,1));
+            CartItem cartItem = cartItemRepository.saveAndFlush(
+                    CartItem.createCartItem(cart, product, 1)
+            );
 
-            membersIds.add(member.getId());
-            request.add(new CreateOrderRequest(List.of(cartItem.getId())));
+            memberIds.add(member.getId());
+            requests.add(new CreateOrderRequest(List.of(cartItem.getId())));
         }
 
         em.clear();
 
-        // when
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+        ExecutorService executorService =
+                Executors.newFixedThreadPool(threadCount);
+
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        AtomicInteger successCount = new AtomicInteger();
+
         for (int i = 0; i < threadCount; i++) {
             int index = i;
-            executorService.execute(() -> {
+
+            executorService.submit(() -> {
+                readyLatch.countDown();
+
                 try {
-                    orderFacade.createOrder(membersIds.get(index), request.get(index));
-                }
-                catch (Exception e) {
-                    log.info("결제 실패 : {}", e.getMessage());
-                }
-                finally {
-                    countDownLatch.countDown();
+                    // 모든 스레드가 이 지점까지 도착할 때까지 대기
+                    startLatch.await();
+                    orderFacade.createOrder(
+                            memberIds.get(index),
+                            requests.get(index)
+                    );
+
+                    successCount.incrementAndGet();
+
+                } catch (Exception e) {
+                    log.info("주문 실패: {}", e.getMessage());
+
+                } finally {
+                    doneLatch.countDown();
                 }
             });
         }
 
-        // then
-        countDownLatch.await();
+        // 모든 작업 스레드가 준비될 때까지 대기
+        readyLatch.await();
+
+        // 동시에 출발
+        startLatch.countDown();
+
+        // 모든 작업 종료 대기
+        doneLatch.await();
+
         executorService.shutdown();
+        executorService.awaitTermination(100, TimeUnit.SECONDS);
 
-        // 성공한 주문의 개수
-        long successOrderCount = orderRepository.count() - beforeOrderCount;
-        Product resultProduct = productRepository.findById(product.getId()).orElseThrow();
+        Product resultProduct =
+                productRepository.findById(product.getId())
+                        .orElseThrow();
 
-        log.info("성공한 주문 수 ={}", successOrderCount);
+        long successOrderCount =
+                orderRepository.count() - beforeOrderCount;
+
+        log.info("성공 카운트 = {}", successCount.get());
+        log.info("저장된 주문 수 = {}", successOrderCount);
         log.info("남은 재고 = {}", resultProduct.getStock());
 
-        assertThat(successOrderCount).isLessThanOrEqualTo(initialStock);
+        assertThat(successCount.get()).isLessThanOrEqualTo(initialStock);
         assertThat(resultProduct.getStock())
-                .isEqualTo(initialStock - successOrderCount);
+                .isEqualTo(initialStock - successCount.get());
 
+        assertThat(successOrderCount)
+                .isEqualTo(successCount.get());
     }
 
 }
