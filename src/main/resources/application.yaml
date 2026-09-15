@@ -24,18 +24,18 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
     defer-datasource-initialization: true
-
   sql:
     init:
       mode: always
 
-#  thymeleaf:
-#    cache: false
-#    prefix: classpath:/templates/
-#    suffix: .html
-
 server:
   port: 8080
+
+portone:
+  base-url: "https://api.portone.io"
+  store-id: "store-82b5d935-d16d-45b1-a309-65042af5317d"
+  channel-key: "channel-key-ca97e191-c472-436a-ac5a-c6bd4bfd24f8"
+  api-secret: ${PORTONE_API_SECRET}
 
 # JWT 설정
 jwt:
