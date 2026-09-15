@@ -5,19 +5,15 @@ import com.example.commerceplus.domain.cart.entity.CartItem;
 import com.example.commerceplus.domain.cart.repository.CartItemRepository;
 import com.example.commerceplus.domain.cart.repository.CartRepository;
 import com.example.commerceplus.domain.member.entity.Member;
-import com.example.commerceplus.domain.member.entity.MemberRole;
 import com.example.commerceplus.domain.member.repository.MemberRepository;
 import com.example.commerceplus.domain.order.dto.request.CreateOrderRequest;
 import com.example.commerceplus.domain.order.repository.OrderRepository;
 import com.example.commerceplus.domain.order.service.OrderFacade;
-import com.example.commerceplus.domain.order.service.OrderService;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.entity.ProductCategory;
 import com.example.commerceplus.domain.product.repository.ProductRepository;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,7 +67,7 @@ public class ConcurrencyTest {
             Member member =
                     memberRepository.saveAndFlush(Member.createNormalMember("test" + i, "1234", "test" + i, "011-1112-111" + i));
             Cart cart = cartRepository.saveAndFlush(Cart.create(member));
-            CartItem cartItem = cartItemRepository.saveAndFlush(CartItem.createCartItem(cart,product,1));
+            CartItem cartItem = cartItemRepository.saveAndFlush(CartItem.createCartItem(cart, product, 1));
 
             membersIds.add(member.getId());
             request.add(new CreateOrderRequest(List.of(cartItem.getId())));
@@ -81,17 +77,16 @@ public class ConcurrencyTest {
 
         // when
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount); // 👈 래치 1개만 사용
+
         for (int i = 0; i < threadCount; i++) {
             int index = i;
-            executorService.execute(() -> {
+            executorService.execute(() -> { // 👈 execute() 사용
                 try {
                     orderFacade.createOrder(membersIds.get(index), request.get(index));
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     log.info("결제 실패 : {}", e.getMessage());
-                }
-                finally {
+                } finally {
                     countDownLatch.countDown();
                 }
             });
@@ -105,13 +100,12 @@ public class ConcurrencyTest {
         long successOrderCount = orderRepository.count() - beforeOrderCount;
         Product resultProduct = productRepository.findById(product.getId()).orElseThrow();
 
-        log.info("성공한 주문 수 ={}", successOrderCount);
+        log.info("성공한 주문 수 = {}", successOrderCount);
         log.info("남은 재고 = {}", resultProduct.getStock());
 
         assertThat(successOrderCount).isLessThanOrEqualTo(initialStock);
         assertThat(resultProduct.getStock())
                 .isEqualTo(initialStock - successOrderCount);
-
     }
 
 }

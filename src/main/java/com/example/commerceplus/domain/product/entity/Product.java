@@ -7,7 +7,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+@Slf4j
 @Getter
 @Entity
 @Table(name = "products")
@@ -51,7 +54,11 @@ public class Product extends BaseTimeEntity {
 
     public void decreaseStock(int stock) {
         isStockLessThanOne(stock);
-
+        log.info("Product Entity thread={}, tx={} productId ={}, productStock ={}, requestStock = {}, totalStock = {} ",
+                Thread.currentThread().getName(),
+                TransactionSynchronizationManager.isActualTransactionActive(),
+                this.id,this.stock, stock, this.stock - stock
+        );
         if (this.stock - stock < 0) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
         }

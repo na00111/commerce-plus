@@ -2,6 +2,7 @@ package com.example.commerceplus.domain.product.repository;
 
 import com.example.commerceplus.domain.product.entity.Product;
 import jakarta.persistence.LockModeType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
