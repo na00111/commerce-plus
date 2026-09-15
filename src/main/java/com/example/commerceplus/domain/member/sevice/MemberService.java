@@ -103,6 +103,7 @@ public class MemberService {
        String token = jwtUtil.createToken(
                member.getId(),
                member.getEmail(),
+               member.getName(),
                member.getPhoneNumber(),
                member.getRole(),
                member.getStatus());
