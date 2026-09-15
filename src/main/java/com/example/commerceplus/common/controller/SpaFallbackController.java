@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class SpaFallbackController {
     @RequestMapping(
-            value = "/{path:^(?!api|auth|assets|favicon\\.ico|index\\.html).*$}/**",
+            value = "/{path:^(?!api|portone|auth|assets|favicon\\.ico|index\\.html).*$}/**",
             method = RequestMethod.GET
     )
     public String forward() {
