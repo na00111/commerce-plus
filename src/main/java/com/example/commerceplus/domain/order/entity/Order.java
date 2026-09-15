@@ -4,7 +4,6 @@ import com.example.commerceplus.common.entity.BaseTimeEntity;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.domain.member.entity.Member;
-import com.example.commerceplus.domain.payment.entity.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -64,7 +63,7 @@ public class Order extends BaseTimeEntity {
     }
 
     // 주문에 상품을 추가하면서 양방향 관계 맺기
-    public void addOrderItem(OrderItem orderItem) {
+    private void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
@@ -83,7 +82,7 @@ public class Order extends BaseTimeEntity {
 
     // 취소 가능한 상태 검증(결제 후 취소)
     public void cancel() {
-        if (this.status != OrderStatus.PAYMENT_PENDING) {
+        if (this.status != OrderStatus.COMPLETED) {
             throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
