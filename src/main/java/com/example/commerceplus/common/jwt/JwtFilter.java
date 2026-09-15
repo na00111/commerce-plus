@@ -59,9 +59,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         Long id = jwtUtil.getUserId(token);
         String email = jwtUtil.extractUserEmail(token);
+        String phoneNumber = jwtUtil.extractUserPhone(token);
         MemberRole role = MemberRole.valueOf(jwtUtil.extractRole(token));
         MemberStatus status = MemberStatus.valueOf(jwtUtil.extractStatus(token));
-        JwtUser jwtUser = new JwtUser(id, email, role, status);
+        JwtUser jwtUser = new JwtUser(id, email, phoneNumber, role, status);
 
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(
                 "ROLE_" + role.name());
