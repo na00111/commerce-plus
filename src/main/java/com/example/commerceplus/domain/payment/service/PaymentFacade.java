@@ -57,7 +57,6 @@ public class PaymentFacade {
         order.validatePaymentPending();
         //금액 검사
         payment.validateAmount(request.amount());
-
     }
 
     private void completePayment(
@@ -76,8 +75,6 @@ public class PaymentFacade {
 
         // 해당 회원의 장바구니에서 주문한 상품만 삭제
         cartItemService.deleteOrderedProducts(memberId, productIds);
-
-
     }
 
     private void failPayment(Payment payment, Order order) {
@@ -90,13 +87,6 @@ public class PaymentFacade {
         productService.restoreStocks(quantities);
 }
 
-    private List<Long> getOrderedProductIds(Order order) {
-        return order.getOrderItems().stream()
-                .map(item ->item.getProduct().getId())
-                .distinct()
-                .toList();
-    }
-
     private Map<Long,Integer> getRestoreQuantities(Order order) {
         Map<Long,Integer> quantities = new TreeMap<>();
         for (OrderItem item : order.getOrderItems()) {
@@ -106,7 +96,14 @@ public class PaymentFacade {
             quantities.merge(productId, quantity, Math::addExact);
         }
         return quantities;
-}
+    }
+
+    private List<Long> getOrderedProductIds(Order order) {
+        return order.getOrderItems().stream()
+                .map(item ->item.getProduct().getId())
+                .distinct()
+                .toList();
+    }
 
     private void validateRequest(PaymentRequest request) {
         if (request == null

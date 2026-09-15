@@ -23,12 +23,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -77,21 +77,8 @@ public class OrderFacade {
             // 이번 수정에서는 네가 사용하던 조회 메서드를 유지합니다.
             Product product = productService.findProductByIdWithLock(cartItem.getProductId());
 
-            try {
-                log.info("락 획득 후 대기 시작 - thread={}, productId={}",
-                        Thread.currentThread().getName(),
-                        product.getId());
-
-                Thread.sleep(1_000L);
-
-                log.info("대기 종료 - thread={}, productId={}",
-                        Thread.currentThread().getName(),
-                        product.getId());
-
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("재고 처리 중 인터럽트가 발생했습니다.", e);
-            }
+            log.info("Order Facade thread={},  productId ={}, productStock ={}",
+                    Thread.currentThread().getName(), product.getId(),product.getStock());
 
             // 주문 수량만큼 재고를 선차감
             product.decreaseStock(cartItem.getQuantity());
