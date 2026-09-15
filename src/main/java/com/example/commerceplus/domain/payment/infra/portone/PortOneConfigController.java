@@ -1,6 +1,7 @@
 package com.example.commerceplus.domain.payment.infra.portone;
 
 import com.example.commerceplus.common.api.ApiResponse;
+import com.example.commerceplus.domain.payment.infra.portone.dto.PortOneConfigResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
