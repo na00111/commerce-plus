@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.TreeMap;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 //결제 처리 순서 , 전체 트랜잭션
 public class PaymentFacade {
     private final OrderService orderService;
@@ -37,20 +39,34 @@ public class PaymentFacade {
         Order order = orderService.findOderIdWithLock(request.orderId());
         //조회한 주문이 로그인한 회원의 주문인지 확인 소유자 검사
         order.validateOwner(memberId);
-        //잠금 주문 확보한 후 기존 결제 조ㅚ
+        //잠금 주문 확보한 후 기존 결제 조사
         Payment payment = paymentService.findByOrderIdWithOrder(order.getId());
         //결제 주문, 상태와 서버 걀제 금액 검증
         validatePayment(request,order,payment);
         //enum -> 성공 아니면 실패
         switch (request.result()) {
             case SUCCESS -> completePayment(memberId,payment,order);
-            case FAIL -> failPayment(payment,order);
+            case FAILED -> failPayment(payment,order);
         }
         //변경된 값을 응답 객체로 변환
         return PaymentResponse.from(payment);
     }
 
-    public void validatePayment(PaymentRequest request,Order order, Payment payment) {
+    public PaymentResponse getPayment(Long memberId,Long paymentId) {
+        // 결제 ID로 결제와 연결된 주문을 함께 조회
+        Payment payment =  paymentService.findByIdWithOrder(paymentId);
+        // 결제 조회에서도 반드시 소유자를 검사
+        payment.getOrder().validateOwner(memberId);
+        return PaymentResponse.from(payment);
+    }
+
+    public Page<PaymentResponse> getPayments(Long memberId, Pageable pageable) {
+        //로그인 회원의 결제 페이지 조회
+        Page<Payment> payments = paymentService.findPaymentsByMemberId(memberId, pageable);
+        return payments.map(PaymentResponse::from);
+    }
+
+    private void validatePayment(PaymentRequest request,Order order, Payment payment) {
         //결제 상태 검사
         payment.validatePendingPayment();
         //주문 상태 검사
@@ -115,19 +131,6 @@ public class PaymentFacade {
         {
             throw new BusinessException(ErrorCode.INVALID_INPUT);
         }
-}
-    public PaymentResponse getPayment(Long memberId,Long paymentId) {
-    // 결제 ID로 결제와 연결된 주문을 함께 조회
-    Payment payment =  paymentService.findByIdWithOrder(paymentId);
-    // 결제 조회에서도 반드시 소유자를 검사
-   payment.getOrder().validateOwner(memberId);
-    return PaymentResponse.from(payment);
-}
+    }
 
-public Page<PaymentResponse> getPayments(Long memberId, Pageable pageable) {
-        //로그인 회원의 결제 페이지 조회
-    Page<Payment> payments = paymentService.findPaymentsByMemberId(memberId, pageable);
-    return payments.map(PaymentResponse::from);
-
-}
 }

@@ -31,6 +31,7 @@ public class PaymentController {
        PaymentResponse response =  paymentFacade.confirm(jwtUser.id(), request);
        return ResponseEntity.ok(ApiResponse.ok(response));
     }
+
     @GetMapping("/{paymentId}")
     public ResponseEntity<ApiResponse<PaymentResponse>> getPayment(
             @Auth JwtUser jwtUser,
@@ -39,6 +40,7 @@ public class PaymentController {
        PaymentResponse response = paymentFacade.getPayment(jwtUser.id(), paymentId);
        return ResponseEntity.ok(ApiResponse.ok(response));
     }
+
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PaymentResponse>>> getPayments(
             @Auth JwtUser jwtUser,

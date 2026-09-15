@@ -22,8 +22,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query("SELECT p FROM Payment p JOIN FETCH p.order WHERE p.order.id = :orderId")
     Optional<Payment> findByOrderIdWithOrder(@Param("orderId") Long orderId);
 
-    Optional<Payment> findByOrderIdAndMemberId(@Param("orderId") Long orderId, @Param("memberId") Long memberId);
-
     @Query("SELECT p FROM Payment p join FETCH p.order WHERE p.id = :paymentId")
     Optional<Payment> findByIdWithOrder(@Param("paymentId") Long paymentId);
 
@@ -31,8 +29,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query(value = "SELECT p FROM Payment p WHERE p.member.id = :memberId ORDER BY p.createdAt DESC , p.id DESC ",
     countQuery = "SELECT COUNT(p) FROM Payment p WHERE p.member.id = :memberId")
     Page<Payment> findPaymentsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
-
-    @Query("SELECT p FROM Payment p join FETCH p.order WHERE p.id = :paymentId")
-    Optional<Payment> findByPaymentId(@Param("paymentId") Long paymentId);
 
 }
