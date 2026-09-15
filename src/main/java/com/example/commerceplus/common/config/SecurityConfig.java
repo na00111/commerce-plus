@@ -32,13 +32,11 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/assets/**", "/favicon.svg", "/icons.svg").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/products/**").permitAll()
                         .requestMatchers("/api/products/bulk").hasRole("ADMIN")
                         .requestMatchers("/api/product/**").hasAnyRole("ADMIN", "OP_ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 .exceptionHandling(exception ->
