@@ -44,8 +44,6 @@ public class SecurityConfig {
                         .loginPage("/auth/login") //커스텀 로그인 페이지 사용
                         .permitAll()
                 )
-                .csrf(AbstractHttpConfigurer::disable)
-
                 .exceptionHandling(exception ->
                       exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
