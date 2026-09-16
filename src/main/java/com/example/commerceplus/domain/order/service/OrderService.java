@@ -6,6 +6,7 @@ import com.example.commerceplus.domain.member.entity.Member;
 import com.example.commerceplus.domain.order.entity.Order;
 import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.order.repository.OrderRepository;
+import com.example.commerceplus.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,22 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    @Transactional
+    public Order cancelOrder(Long orderId, Long memberId) {
+        Order order = orderRepository.findByIdWithOrderItems(orderId).orElseThrow(()
+                -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        order.validateOwner(memberId);
+        order.cancel();
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Product product = orderItem.getProduct();
+            product.restoreStock(orderItem.getQuantity());
+        }
+
+        return order;
+    }
+
     public Page<Order> findOrdersByMemberId(Long memberId, Pageable pageable) {
         return orderRepository.findByMemberId(memberId, pageable);
     }
@@ -43,7 +60,6 @@ public class OrderService {
     public Order findOderIdWithLock(Long orderId) {
         return orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
-
     }
 
     public List<Order> findPendingOrdersOlderThan(LocalDateTime thresholdTime) {
