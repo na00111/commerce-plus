@@ -32,17 +32,13 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        //소셜 로그인 엔드 포인트는 로그인하지 않은 사용자도 접근 가능해야 하므로 허용
+                        .requestMatchers("/auth/google", "/auth/kakao", "/auth/naver").permitAll()
                         .requestMatchers("/api/products/bulk").hasRole("ADMIN")
                         .requestMatchers("/api/product/**").hasAnyRole("ADMIN", "OP_ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()
-                        //소셜 로그인 엔드 포인트는 로그인하지 않은 사용자도 접근 가능해야 하므로 허용
-                        .requestMatchers("/auth/google", "/auth/kakao", "/auth/naver").permitAll()
                         .anyRequest().permitAll()
-                )
-                .formLogin(formLogin->formLogin
-                        .loginPage("/auth/login") //커스텀 로그인 페이지 사용
-                        .permitAll()
                 )
                 .exceptionHandling(exception ->
                       exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
