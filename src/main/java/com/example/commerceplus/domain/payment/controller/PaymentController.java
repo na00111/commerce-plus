@@ -3,11 +3,10 @@ package com.example.commerceplus.domain.payment.controller;
 import com.example.commerceplus.common.annotation.Auth;
 import com.example.commerceplus.common.api.ApiResponse;
 import com.example.commerceplus.common.api.PageResponse;
-import com.example.commerceplus.common.exception.BusinessException;
-import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.common.jwt.JwtUser;
 import com.example.commerceplus.domain.payment.dto.request.PostPaymentMockRequest;
 import com.example.commerceplus.domain.payment.dto.request.PostPaymentRequest;
+import com.example.commerceplus.domain.payment.dto.request.SearchPaymentConditionRequest;
 import com.example.commerceplus.domain.payment.dto.response.PaymentResponse;
 import com.example.commerceplus.domain.payment.service.PaymentFacade;
 import jakarta.validation.Valid;
@@ -56,15 +55,9 @@ public class PaymentController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PaymentResponse>>> getPayments(
             @Auth JwtUser jwtUser,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10")  int size
+            @Valid SearchPaymentConditionRequest condition
     ) {
-        // PageRequest 생성 전에 잘못된 값을 검사
-        // 페이지 크기 상한 100
-        if (page < 0 || size < 1 || size > 100) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT, "페이지는 0 이상 ,사이즈는 1~100으로");
-        }
-           Pageable pageable = PageRequest.of(page , size);
+           Pageable pageable = PageRequest.of(condition.page(), condition.size());
            Page<PaymentResponse> payments =  paymentFacade.getPayments(jwtUser.id(),pageable);
            PageResponse<PaymentResponse> response = PageResponse.of(payments ,payment -> payment);
            return ResponseEntity.ok(ApiResponse.ok(response));
