@@ -6,9 +6,11 @@ import com.example.commerceplus.common.api.PageResponse;
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
 import com.example.commerceplus.common.jwt.JwtUser;
-import com.example.commerceplus.domain.payment.dto.request.PaymentRequest;
+import com.example.commerceplus.domain.payment.dto.request.PostPaymentMockRequest;
+import com.example.commerceplus.domain.payment.dto.request.PostPaymentRequest;
 import com.example.commerceplus.domain.payment.dto.response.PaymentResponse;
 import com.example.commerceplus.domain.payment.service.PaymentFacade;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,13 +25,23 @@ public class PaymentController {
     private final PaymentFacade paymentFacade;
 
     @PostMapping("/mock/confirm")
-    public ResponseEntity<ApiResponse<PaymentResponse>> confirmPayment(
+    public ResponseEntity<ApiResponse<PaymentResponse>> confirmPaymentMock(
             @Auth JwtUser jwtUser,
-            @RequestBody PaymentRequest request
+            @RequestBody @Valid PostPaymentMockRequest request
     ) {
         // 로그인 사용자 ID와 요청을 Facade로 전달
-       PaymentResponse response =  paymentFacade.confirm(jwtUser.id(), request);
+       PaymentResponse response =  paymentFacade.confirmMock(jwtUser.id(), request);
        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<ApiResponse<PaymentResponse>> confirmPayment(
+            @Auth JwtUser jwtUser,
+            @RequestBody @Valid PostPaymentRequest request
+    ) {
+        // 로그인 사용자 ID와 요청을 Facade로 전달
+        PaymentResponse response =  paymentFacade.confirm(jwtUser.id(), request);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @GetMapping("/{paymentId}")

@@ -78,9 +78,16 @@ public class Payment extends BaseTimeEntity {
     }
 
     // 요청 금액과 서버에 저장된 결제 금액이 일치하는지 검증
-    public void validateAmount(int requestAmount) {
+    public void validateAmount(long requestAmount) {
         if (this.amount != requestAmount) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+    }
+
+    // 요청한 portoneId와 저장된 portoneId가 일치하는지 검증
+    public void validatePortonePaymentId(String portonePaymentId) {
+        if (!this.portonePaymentId.equals(portonePaymentId)) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
         }
     }
 
