@@ -9,11 +9,14 @@ import com.example.commerceplus.domain.payment.dto.request.PostPaymentMockReques
 import com.example.commerceplus.domain.payment.dto.request.PostPaymentRequest;
 import com.example.commerceplus.domain.payment.dto.response.PaymentResponse;
 import com.example.commerceplus.domain.payment.entity.Payment;
+import com.example.commerceplus.domain.payment.entity.PaymentStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 // 결제 순서 조율만 담딩
@@ -30,12 +33,47 @@ public class PaymentFacade {
         order.validateOwner(memberId);
         // 결제 주문, 상태와 portOneId 검증
         validatePayment(request, order, payment);
-        // portOne에 결제 확인 요청
-        PaymentGatewayResponse response = paymentGateway.getPayment(request.portonePaymentId());
-        // 받은 결제 정보 검증
-        validatePortonePayment(request,response,payment);
 
-        return paymentExecutionService.completePayment(memberId,payment.getId(),order.getId());
+        PaymentGatewayResponse response = null;
+        try {
+            // portOne에 결제 확인 요청
+            response = paymentGateway.getPayment(request.portonePaymentId());
+
+            if (response == null) {
+                log.error("포트원 응답을 받지 못함");
+                throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+            }
+
+            // 받은 결제 정보 검증
+            validatePortonePayment(request,response,payment);
+            // 완료처리
+            return paymentExecutionService.completePayment(memberId,payment.getId(),order.getId());
+        } // 결제 정보 검증이나 완료 처리 실패
+        catch (Exception originalException){
+            Payment latestPayment = paymentService.findByOrderIdWithOrder(request.orderId());
+            // 다른 트랜잭션에서 어떤 형태이든 처리가 된 상황
+            if (latestPayment.getStatus() != PaymentStatus.PAYMENT_PENDING ){
+                return PaymentResponse.from(latestPayment);
+            }
+
+            boolean isPaid = response != null && "PAID".equals(response.status());
+
+            if (isPaid){
+                try {
+                    paymentGateway.cancelPayment(request.portonePaymentId(), "결제 승인 처리 중 에러 발생 - 자동 환불");
+                    paymentExecutionService.failPayment(memberId,payment.getId(),order.getId());
+                }catch (Exception cancelException){
+                    // 취소를 하는데 문제가 발생함
+                    log.error("포트원 자동 환불 API 호출 실패! 별도 처리 필요. memberId={} paymentId={}",memberId ,payment.getId(), cancelException);
+                    paymentExecutionService.markCancelFailed(payment.getId());
+                }
+            }else {
+                // 돈이 지불되지 않은 경우(통신 등 여러 이유로)
+                paymentExecutionService.failPayment(memberId,payment.getId(),order.getId());
+            }
+
+            throw originalException;
+        }
     }
 
     // 모의 결제
@@ -104,7 +142,6 @@ public class PaymentFacade {
         }
         // 실제 결제 금액이 일치한지 확인
         payment.validateAmount(response.totalAmount());
-        // 보상 트랙잭션
     }
 
 }

@@ -119,6 +119,15 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.CANCELED;
     }
 
+    // 결제가 잘못되었지만 취소가 되지 않음 : PAYMENT_PENDING -> CANCEL_FAILED
+    public void cancelFailed() {
+        if (!this.status.canTransitTo(PaymentStatus.CANCEL_FAILED)) {
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT_STATUS);
+        }
+
+        this.status = PaymentStatus.CANCEL_FAILED;
+    }
+
     // 연관된 주문 ID 반환
     public Long getOrderId() {
         return order.getId();
