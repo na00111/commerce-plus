@@ -25,15 +25,15 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
     );
 
     // 상세 조회 (fetch join으로 orderItems 함께 로드)
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId")
+    @Query("""
+    SELECT DISTINCT o
+    FROM Order o
+    LEFT JOIN FETCH o.orderItems oi
+    LEFT JOIN FETCH oi.product
+    WHERE o.id = :orderId
+    """)
     Optional<Order> findByIdWithOrderItems(@Param("orderId") Long orderId);
 
-    // 주문 취소
-    Optional<Order> findByIdAndMemberId(
-            Long orderId,
-            Long memberId
-    );
-  
     //동일 주문의 상태 변경을 한 번에 하나씩 진행
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM Order o WHERE o.id = :orderId")
