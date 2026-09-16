@@ -48,4 +48,9 @@ public class PaymentService {
        return paymentRepository.findPaymentsByMemberId(memberId, pageable);
     }
 
+    public Payment findPaymentByIdWithLock(Long paymentId) {
+        return paymentRepository.findByIdWithLock(paymentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+    }
+
 }

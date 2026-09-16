@@ -2,53 +2,61 @@ package com.example.commerceplus.domain.payment.service;
 
 import com.example.commerceplus.common.exception.BusinessException;
 import com.example.commerceplus.common.exception.ErrorCode;
-import com.example.commerceplus.domain.cart.service.CartItemService;
 import com.example.commerceplus.domain.order.entity.Order;
-import com.example.commerceplus.domain.order.entity.OrderItem;
-import com.example.commerceplus.domain.order.service.OrderService;
-import com.example.commerceplus.domain.payment.dto.request.PaymentRequest;
+import com.example.commerceplus.domain.payment.domain.PaymentGateway;
+import com.example.commerceplus.domain.payment.domain.PaymentGatewayResponse;
+import com.example.commerceplus.domain.payment.dto.request.PostPaymentMockRequest;
+import com.example.commerceplus.domain.payment.dto.request.PostPaymentRequest;
 import com.example.commerceplus.domain.payment.dto.response.PaymentResponse;
 import com.example.commerceplus.domain.payment.entity.Payment;
-import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
-//결제 처리 순서 , 전체 트랜잭션
+// 결제 순서 조율만 담딩
 public class PaymentFacade {
-    private final OrderService orderService;
     private final PaymentService  paymentService;
-    private final CartItemService cartItemService;
-    private final ProductService productService;
+    private final PaymentExecutionService paymentExecutionService;
+    private final PaymentGateway paymentGateway;
 
-    public PaymentResponse confirm(
-            Long memberId, PaymentRequest request
-    ) {
-       validateRequest(request);
-        //주문 먼저 잠그기
-        Order order = orderService.findOderIdWithLock(request.orderId());
-        //조회한 주문이 로그인한 회원의 주문인지 확인 소유자 검사
+    // portOne 결제
+    public PaymentResponse confirm(Long memberId, PostPaymentRequest request) {
+        Payment payment = paymentService.findByOrderIdWithOrder(request.orderId());
+        Order order = payment.getOrder();
+        // 조회한 주문이 로그인한 회원의 주문인지 확인 소유자 검사
         order.validateOwner(memberId);
-        //잠금 주문 확보한 후 기존 결제 조사
-        Payment payment = paymentService.findByOrderIdWithOrder(order.getId());
-        //결제 주문, 상태와 서버 걀제 금액 검증
-        validatePayment(request,order,payment);
-        //enum -> 성공 아니면 실패
+        // 결제 주문, 상태와 portOneId 검증
+        validatePayment(request, order, payment);
+        // portOne에 결제 확인 요청
+        PaymentGatewayResponse response = paymentGateway.getPayment(request.portonePaymentId());
+        // 받은 결제 정보 검증
+        validatePortonePayment(request,response,payment);
+
+        return paymentExecutionService.completePayment(memberId,payment.getId(),order.getId());
+    }
+
+    // 모의 결제
+    public PaymentResponse confirmMock(Long memberId, PostPaymentMockRequest request) {
+        Payment payment = paymentService.findByOrderIdWithOrder(request.orderId());
+        Order order = payment.getOrder();
+        // 조회한 주문이 로그인한 회원의 주문인지 확인 소유자 검사
+        order.validateOwner(memberId);
+        // 결제 주문, 상태와 결제 금액 검증
+        validatePaymentMock(request,order,payment);
+        // 모의결제로 클라이언트가 보내준 결과에 따라 성공 및 실패처
         switch (request.result()) {
-            case SUCCESS -> completePayment(memberId,payment,order);
-            case FAILED -> failPayment(payment,order);
+            //변경된 값을 응답 객체로 리턴
+            case SUCCESS -> {
+                return paymentExecutionService.completePayment(memberId, payment.getId(), order.getId());
+            }
+            case FAILED
+                    -> {
+                return paymentExecutionService.failPayment(memberId, payment.getId(), order.getId());
+            }
         }
-        //변경된 값을 응답 객체로 변환
         return PaymentResponse.from(payment);
     }
 
@@ -66,7 +74,7 @@ public class PaymentFacade {
         return payments.map(PaymentResponse::from);
     }
 
-    private void validatePayment(PaymentRequest request,Order order, Payment payment) {
+    private void validatePaymentMock(PostPaymentMockRequest request, Order order, Payment payment) {
         //결제 상태 검사
         payment.validatePendingPayment();
         //주문 상태 검사
@@ -75,62 +83,28 @@ public class PaymentFacade {
         payment.validateAmount(request.amount());
     }
 
-    private void completePayment(
-            Long memberId,
-            Payment payment,
-            Order order
-    ) {
-        // 이번 주문에 포함된 상품 ID를 가져옴
-        List<Long> productIds = getOrderedProductIds(order);
-
-        // 결제를 완료하고 완료 시각을 기록
-        payment.complete(LocalDateTime.now());
-
-        // 주문 상태를 완료로 변경
-        order.completePayment();
-
-        // 해당 회원의 장바구니에서 주문한 상품만 삭제
-        cartItemService.deleteOrderedProducts(memberId, productIds);
+    // mock과 달리 금액 검증은 portOne에서 주는 정보로 검증
+    private void validatePayment(PostPaymentRequest request, Order order, Payment payment) {
+        payment.validatePendingPayment();
+        order.validatePaymentPending();
+        // portoneId 검사
+        payment.validatePortonePaymentId(request.portonePaymentId());
     }
 
-    private void failPayment(Payment payment, Order order) {
-        // 복구할 상품과 수량을 주문 기록에서 추출
-        Map<Long,Integer> quantities = getRestoreQuantities(order);
-        // 실패 결과를 저장할 상태로 변경
-        payment.fail();
-        order.cancel();
-        // 복구 중 예외가 발생하면  상태 변경도 함께 롤백
-        productService.restoreStocks(quantities);
-}
-
-    private Map<Long,Integer> getRestoreQuantities(Order order) {
-        Map<Long,Integer> quantities = new TreeMap<>();
-        for (OrderItem item : order.getOrderItems()) {
-            Long productId = item.getProduct().getId();
-            int quantity = item.getQuantity();
-            // 같은 상품이 여러 항목에 있으면 수량을 합침
-            quantities.merge(productId, quantity, Math::addExact);
+    private void validatePortonePayment
+            (PostPaymentRequest request, PaymentGatewayResponse response, Payment payment)
+    {
+        // portoneId 검사
+        if (!response.id().equals(request.portonePaymentId())) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
         }
-        return quantities;
-    }
-
-    private List<Long> getOrderedProductIds(Order order) {
-        return order.getOrderItems().stream()
-                .map(item ->item.getProduct().getId())
-                .distinct()
-                .toList();
-    }
-
-    private void validateRequest(PaymentRequest request) {
-        if (request == null
-            || request.orderId() == null      // 1. 주문 ID 값이 아예 비어있거나(null)
-            || request.orderId() < 1         // 2. 또는, 주문 ID가 0 이하의 잘못된 숫자이거나
-            || request.result() == null       // 3. 또는, 처리 결과(result) 값이 비어있거나(null)
-            || request.amount() == null       // 4. 또는, 결제 금액(amount) 값이 비어있거나(null)
-            || request.amount() < 1 )          // 5. 또는, 결제 금액이 1원 미만(0원 이하)인 경우
-        {
-            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        // 결제가 되었는지 검사
+        if (!response.status().equals("PAID")){
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT_STATUS);
         }
+        // 실제 결제 금액이 일치한지 확인
+        payment.validateAmount(response.totalAmount());
+        // 보상 트랙잭션
     }
 
 }

@@ -1,14 +1,17 @@
 spring:
+  profiles:
+    include: secret # 💡 application-secret.yml 파일을 자동으로 불러옵니다.
   application:
     name: commerceplus
   cache:
     caffeine:
       spec: maximumSize=100,expireAfterWrite=300s
 
+  # 도커 컴포즈 가상 네트워크 환경에 대응하도록 URL 주소 최적화
   datasource:
-    url: jdbc:mysql://localhost:3306/commerceplus?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
-    username: root
-    password: 1234
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/commerceplus?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       initialization-fail-timeout: 60000
@@ -35,9 +38,6 @@ portone:
   base-url: "https://api.portone.io"
   store-id: "store-82b5d935-d16d-45b1-a309-65042af5317d"
   channel-key: "channel-key-ca97e191-c472-436a-ac5a-c6bd4bfd24f8"
-  api-secret: ${PORTONE_API_SECRET}
 
-# JWT 설정
 jwt:
-  secret: "OONfMJx8azH6xrRzbhNGQ0JHkoNVNQS+N75QRNc8MGY="
-  expiration: 3600000  # 1시간 (ms)
+  expiration: 3600000 # 1시간 (ms)
