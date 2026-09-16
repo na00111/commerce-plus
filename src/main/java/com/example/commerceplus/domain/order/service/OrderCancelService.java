@@ -24,7 +24,7 @@ public class OrderCancelService {
     private final ProductRepository productRepository;
 
     // 결제를 하지않고 재고만 차지하는 주믄을 취소
-    // 주문들을 취소 시 각 주문마다 별도의 트랜잭션을 주어서 오랜시간 락을 점유하는걸 방지한다.ㅈ
+    // 주문들을 취소 시 각 주문마다 별도의 트랜잭션을 주어서 오랜시간 락을 점유하는걸 방지한다.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancelOrderAndRestoreStock(Long expiredOrderId) {
 
@@ -50,6 +50,6 @@ public class OrderCancelService {
             product.restoreStock(orderItem.getQuantity());
         }
 
-        order.cancelByTimeout();
+        order.cancel();
     }
 }
