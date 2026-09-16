@@ -11,6 +11,7 @@ import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 // 결제 시 반드시 모두성공 혹은 모두 실패만 해야하는 기능을 담당
 public class PaymentExecutionService {
@@ -29,6 +29,7 @@ public class PaymentExecutionService {
     private final PaymentService paymentService;
     private final OrderService orderService;
 
+    @Transactional
     public PaymentResponse completePayment(Long memberId, Long paymentId, Long orderId) {
         // 일반 Facade가 아니라 여기서 락을 걸음
         Payment payment = paymentService.findPaymentByIdWithLock(paymentId);
@@ -54,6 +55,7 @@ public class PaymentExecutionService {
         return PaymentResponse.from(payment);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PaymentResponse failPayment(Long memberId, Long paymentId, Long orderId) {
         Payment payment = paymentService.findPaymentByIdWithLock(paymentId);
         Order order = orderService.findOderIdWithLock(orderId);
@@ -77,6 +79,7 @@ public class PaymentExecutionService {
         return PaymentResponse.from(payment);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markCancelFailed(Long paymentId) {
         Payment payment = paymentService.findPaymentByIdWithLock(paymentId);
         payment.cancelFailed();
