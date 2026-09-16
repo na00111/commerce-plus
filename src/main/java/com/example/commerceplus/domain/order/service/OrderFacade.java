@@ -16,7 +16,6 @@ import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
 import com.example.commerceplus.domain.product.service.ProductService;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,7 +40,7 @@ public class OrderFacade {
     private final PaymentService paymentService;
     private final ProductService productService;
     private final CartItemService cartItemService;
-    private final EntityManager em;
+
     @Transactional(readOnly = true)
     public GetCheckoutResponse getCheckoutOne(Long memberId, List<Long> cartItemIds) {
 

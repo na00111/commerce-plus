@@ -64,8 +64,8 @@ public class PaymentExecutionService {
 
         // portOne과 같은 검증 후 시간이 지남에따라 데이터가 변동되었을 수 있어 한번 더 검증을 함
         order.validateOwner(memberId);
-        order.validatePaymentPending();
         payment.validatePendingPayment();
+        order.validatePaymentPending();
 
         // 복구할 상품과 수량을 주문 기록에서 추출
         Map<Long,Integer> quantities = getRestoreQuantities(order);
@@ -75,6 +75,11 @@ public class PaymentExecutionService {
         // 복구 중 예외가 발생하면  상태 변경도 함께 롤백
         productService.restoreStocks(quantities);
         return PaymentResponse.from(payment);
+    }
+
+    public void markCancelFailed(Long paymentId) {
+        Payment payment = paymentService.findPaymentByIdWithLock(paymentId);
+        payment.cancelFailed();
     }
 
     private Map<Long,Integer> getRestoreQuantities(Order order) {
