@@ -23,7 +23,7 @@ public record SearchProductConditionRequest(
 
     public SearchProductConditionRequest {
         if (page == null) page = 0;
-        if (size == null) size = 10;
+        if (size == null) size = 9;
     }
 
     // 캐시에 저장할 키를 리턴
