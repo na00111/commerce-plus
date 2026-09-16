@@ -80,17 +80,8 @@ public class Order extends BaseTimeEntity {
         return firstName + " 외 " + (orderItems.size() - 1) + "건";
     }
 
-    // 취소 가능한 상태 검증(결제 후 취소)
+    // 취소 가능한 상태 검증(결제 전 취소)
     public void cancel() {
-        if (this.status != OrderStatus.COMPLETED) {
-            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
-        }
-
-        this.status = OrderStatus.CANCELED;
-    }
-
-    // 취소 가능한 상태 검증(결제전 시간만료로 인한 취소)
-    public void cancelByTimeout() {
         if (this.status != OrderStatus.PAYMENT_PENDING) {
             throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
         }
@@ -101,13 +92,6 @@ public class Order extends BaseTimeEntity {
     public void validateOwner(Long memberId) {
         if (!this.member.getId().equals(memberId)) {
             throw new BusinessException(ErrorCode.ORDER_ACCESS_DENIED);
-        }
-    }
-
-    // 결제 부분 추가
-    public void validatePaymentAmount(int requestAmount) {
-        if (this.totalPrice != requestAmount) {
-            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
     }
 
