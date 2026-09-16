@@ -15,20 +15,15 @@ import com.example.commerceplus.domain.order.entity.OrderItem;
 import com.example.commerceplus.domain.payment.entity.Payment;
 import com.example.commerceplus.domain.payment.service.PaymentService;
 import com.example.commerceplus.domain.product.entity.Product;
-import com.example.commerceplus.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 @Transactional
@@ -38,8 +33,8 @@ public class OrderFacade {
     private final MemberService memberService;
     private final OrderService orderService;
     private final PaymentService paymentService;
-    private final ProductService productService;
     private final CartItemService cartItemService;
+    private final OrderCalculationProcessor orderCalculationProcessor;
 
     @Transactional(readOnly = true)
     public GetCheckoutResponse getCheckoutOne(Long memberId, List<Long> cartItemIds) {
@@ -60,47 +55,21 @@ public class OrderFacade {
 
     //생성할 주문 항목을 담는 빈 목록
     public CreateOrderResponse createOrder(Long memberId, CreateOrderRequest request) {
-
+        // 로그인한 사용자의 cart를 가져옴
         Member member = memberService.findMemberById(memberId);
-        Cart cart = cartService.findCart(member.getId()).orElseThrow( () -> new BusinessException(ErrorCode.CART_NOT_FOUND));
-      
+        Cart cart = cartService.findCart(member.getId()).orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
+
+        // 장바구니 상품이 유효한지 확인하고 장바구니 생성 및 상품 재고차감
         List<CartItem> cartItems = cartItemService.findAndValidateCartItems(cart, request.cartItemIds());
-        // 데드락 방지를 위해 ProductId로 정렬
-        List<CartItem> sortedCartItems = cartItems.stream()
-                .sorted(Comparator.comparing(cartItem -> cartItem.getProduct().getId()))
-                .toList();
-        List<OrderItem> orderItems = new ArrayList<>();
+        List<OrderItem> orderItems = orderCalculationProcessor.lockAndCreateOrderItems(cartItems);
 
-        //선택한 장바구니 항목을 주문 항목으로 변환
-        for (CartItem cartItem : sortedCartItems) {
-            // 이번 수정에서는 네가 사용하던 조회 메서드를 유지합니다.
-            Product product = productService.findProductByIdWithLock(cartItem.getProductId());
-
-            log.info("Order Facade thread={},  productId ={}, productStock ={}",
-                    Thread.currentThread().getName(), product.getId(),product.getStock());
-
-            // 주문 수량만큼 재고를 선차감
-            product.decreaseStock(cartItem.getQuantity());
-
-            // 기존 3개 인자 생성자를 사용 상품, 주문 당시 가격, 주문 수량만 전달
-            OrderItem orderItem = OrderItem.create(product, product.getPrice(), cartItem.getQuantity());
-
-            // 생성한 주문 항목을 목록에 추가
-            orderItems.add(orderItem);
-        }
-
-        //각 항목의 소계(가격 × 수량)를 합산
-        int totalPrice = orderItems.stream()
-                .mapToInt(OrderItem::getSubtotal)
-                .sum();
-
-        //주문과 주문 항목을 저장
+        // 장바구니에 담긴 총 상품 계산 후 주문 생성
+        int totalPrice = orderItems.stream().mapToInt(OrderItem::getSubtotal).sum();
         Order order = orderService.createOrder(member, orderItems, totalPrice);
 
-        // 해당 주문의 대기 결제를 생성
+        //  결제 생성
         Payment payment = paymentService.createPayment(order);
 
-        //주문 생성 결과를 반환 장바구니는 결제 성공까지 유지
         return CreateOrderResponse.from(order, payment);
     }
 
@@ -128,20 +97,15 @@ public class OrderFacade {
 
     // 주문 취소
     public CancelOrderResponse cancelOrder(Long memberId, Long orderId) {
-        Order order = orderService.findOrderById(orderId);
-        order.validateOwner(memberId);
+        // 주문취소와 재고 복구
+        Order order = orderService.cancelOrder(orderId, memberId);
+
         Payment payment = paymentService.findPaymentByOrderId(orderId)
                 .orElseThrow(() ->
                         new BusinessException(ErrorCode.PAYMENT_NOT_FOUND)
                 );
-
-        for (OrderItem orderItem : order.getOrderItems()) {
-            Product product = orderItem.getProduct();
-            product.restoreStock(orderItem.getQuantity());
-        }
-
         payment.cancel();
-        order.cancel();
+
         return new CancelOrderResponse(
                 order,
                 payment.getStatus()

@@ -2,7 +2,7 @@ package com.example.commerceplus.domain.payment.entity;
 
 
 // 결제 상태 전이 규칙
-// PAYMENT_PENDING → COMPLETED / FAILED / CANCEL_FAILED
+// PAYMENT_PENDING → ALL
 // COMPLETED       → CANCELED
 // FAILED          → (종료)
 // CANCELED        → (종료)
@@ -13,7 +13,8 @@ public enum PaymentStatus {
     PAYMENT_PENDING {
         @Override
         public boolean canTransitTo(PaymentStatus target) {
-            return target == COMPLETED || target == FAILED || target == CANCEL_FAILED;
+            return target == COMPLETED || target == FAILED ||
+                    target == CANCEL_FAILED || target == CANCELED;
         }
     },
 
@@ -45,7 +46,6 @@ public enum PaymentStatus {
             return target == FAILED || target == CANCELED;
         }
     };
-
 
     public abstract boolean canTransitTo(PaymentStatus target);
 }
