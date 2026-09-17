@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         //소셜 로그인 엔드 포인트는 로그인하지 않은 사용자도 접근 가능해야 하므로 허용
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/favicon.svg", "/assets/**").permitAll()
                         .requestMatchers("/auth/google", "/auth/kakao", "/auth/naver").permitAll()
                         .requestMatchers("/api/products/bulk").hasRole("ADMIN")
                         .requestMatchers("/api/product/**").hasAnyRole("ADMIN", "OP_ADMIN")
@@ -53,6 +55,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("https://plus.wyshin.click");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
